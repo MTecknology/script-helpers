@@ -9,9 +9,9 @@
 ##
 # Print a formatted (critical) message and exit with status
 #
-# Usage: die [exit_status] message
+# **Usage:** die [exit_status] message
 #
-# Defaults:
+# **Defaults:**
 #
 # - exit_status: 1
 ##
@@ -31,13 +31,13 @@ die() {
 ##
 # Print a formatted (critical) message if ENV[LOG_LEVEL] >= level
 #
-# Usage: log level message
+# **Usage:** log level message
 #
-# Defaults:
+# **Defaults:**
 #
 # - ENV[LOG_LEVEL]: 2
 #
-# Parameter Options:
+# **Parameter Options:**
 #
 # - level => 0:debug, 1:info, \*2:warn, 3:error
 ##
@@ -57,9 +57,11 @@ log() {
 
 
 ##
-# Returns '0' if ($str is 0) or (lower($1) == true)
+# Evaluate if a given string is true-like
 #
-# Usage: is_true "$str"
+# **Usage:** is_true "$str"
+#
+# **Returns:** '0' if ($str is 0) or (lower($1) == true)
 ##
 is_true() {
         str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
@@ -71,9 +73,11 @@ is_true() {
 
 
 ##
-# Returns '0' if ($str is 1) or (lower($1) != true)
+# Evaluate if a given string is true-like
 #
-# Usage: is_false "$str"
+# **Usage:** is_false "$str"
+#
+# **Returns:** '0' if ($str is 1) or (lower($1) != true)
 ##
 is_false() {
         is_true "$1" && return 1
