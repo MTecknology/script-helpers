@@ -6,8 +6,10 @@
 ##
 
 
-# Print a formatted message and exit with non-zero status.
+# Print a formatted (critical) message and exit with status
 # Usage: die [exit_status] message
+# Defaults:
+# - exit_status: 1
 die() {
         # If first argument was an integer, use as exit_status
         if [ "$1" -eq "$1" ] 2>/dev/null; then
@@ -21,8 +23,11 @@ die() {
 }
 
 
-# Log a message to stdout if LOG_LEVEL(def:2) >= $level
+# Print a formatted (critical) message if ENV[LOG_LEVEL] >= level
 # Usage: log level message
+# Defaults:
+# - ENV[LOG_LEVEL]: 2
+# Parameter Options:
 # - level => 0:debug, 1:info, *2:warn, 3:error
 log() {
         if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
