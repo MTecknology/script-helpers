@@ -29,7 +29,8 @@ Origin
 One of the biggest headaches I run into at any company in technichal debt. No
 matter how many times I recommend a central set of well-tested reusable
 functions available on every system for every script to improve consistency,
-speed, readability, etc.
+speed, readability, etc., it's always considered "too much work" or some other
+terrible excuse.
 
 So... here it is. I don't know if anyone will ever use it, but it's time for
 such a "library" to finally exist.

@@ -6,10 +6,15 @@
 ##
 
 
+##
 # Print a formatted (critical) message and exit with status
+#
 # Usage: die [exit_status] message
+#
 # Defaults:
+#
 # - exit_status: 1
+##
 die() {
         # If first argument was an integer, use as exit_status
         if [ "$1" -eq "$1" ] 2>/dev/null; then
@@ -23,12 +28,19 @@ die() {
 }
 
 
+##
 # Print a formatted (critical) message if ENV[LOG_LEVEL] >= level
+#
 # Usage: log level message
+#
 # Defaults:
+#
 # - ENV[LOG_LEVEL]: 2
+#
 # Parameter Options:
+#
 # - level => 0:debug, 1:info, *2:warn, 3:error
+##
 log() {
         if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
                 case "$1" in
@@ -44,8 +56,11 @@ log() {
 }
 
 
+##
 # Returns '0' if ($str is 0) or (lower($1) == true)
+#
 # Usage: is_true "$str"
+##
 is_true() {
         str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
         [ "$str" -eq '0' ] 2>/dev/null && return 0
@@ -55,8 +70,11 @@ is_true() {
 }
 
 
+##
 # Returns '0' if ($str is 1) or (lower($1) != true)
+#
 # Usage: is_false "$str"
+##
 is_false() {
         is_true "$1" && return 1
         return 0

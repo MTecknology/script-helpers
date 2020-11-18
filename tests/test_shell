@@ -12,7 +12,7 @@ main() {
 	printf 'Running Tests...\n'
 	for path in "$TESTDIR/shell_units/"*; do
 		file="$(basename "$path")"
-		# Skip files starting with and underscore
+		# Skip files starting with an underscore
 		[ "$file" = "${file#_}" ] || continue
 
 		# Run test unit

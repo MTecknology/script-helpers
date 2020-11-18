@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+##
+# Generate a documentation file from input "library" scripts.
+##
+
+with open('lib/shell', 'r') as _fh:
+    print('Script Helpers\n====\n')
+    builder = ''
+    for line in _fh.readlines():
+        if '()' in line:
+            command = line.split()[0]
+            print('{}\n----\n\n{}'.format(command, builder))
+            continue
+        if line.startswith('##'):
+            continue
+        elif line.startswith('#'):
+            builder += line.strip('#')
+            continue
+        else:
+            builder = ''
+            continue
