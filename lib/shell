@@ -39,7 +39,7 @@ die() {
 #
 # Parameter Options:
 #
-# - level => 0:debug, 1:info, *2:warn, 3:error
+# - level => 0:debug, 1:info, \*2:warn, 3:error
 ##
 log() {
         if [ "${LOG_LEVEL:-2}" -le "$1" ]; then

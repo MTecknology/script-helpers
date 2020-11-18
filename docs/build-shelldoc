@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+'''
+Generate a documentation file from input "library" scripts.
+'''
+import os
+import sys
+
+
+WORKSPACE = os.environ.get('WORKSPACE', './')
+SHELL_LIB = '{}/lib/shell'.format(WORKSPACE)
+SHELL_DOC = '{}/docs/helpers/shell.rst'.format(WORKSPACE)
+
+
+if not os.path.exists(SHELL_LIB):
+    print('{} not found in context: skipping'.format(SHELL_LIB))
+    sys.exit(0)
+
+with open(SHELL_LIB, 'r') as _in:
+    with open(SHELL_DOC, 'w') as _out:
+        _out.write('Shell Helpers\n=============\n\n')
+        builder = ''
+        for line in _in.readlines():
+            if '()' in line:
+                command = line.split()[0]
+                _out.write('{}\n{}\n\n{}\n'.format(
+                    command,
+                    ''.join(['-' for _ in command]),
+                    builder))
+                continue
+            if line.startswith('##'):
+                continue
+            elif line.startswith('#'):
+                builder += line.strip('#')
+                continue
+            else:
+                builder = ''
+                continue

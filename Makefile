@@ -1,14 +1,22 @@
-doc: doc_shell
+export WORKSPACE ?= $(abspath $(PWD)/)
 
-doc_shell:
-	./misc/build_shelldoc
+.PHONY: clean
+clean:
+	rm -rf \
+		_build \
+		docs/helpers/*.rst
 
-test: test_shell test_py
+.PHONY: docs
+docs: clean
+	sphinx-build docs/ _build/docs/
 
+.PHONY: test
+test: test_shell
+
+.PHONY: test_shell
 test_shell:
 	sh ./tests/test_shell
 
-test_py:
-	#pytest
-
-.PHONY: doc doc_shell test test_shell test_py
+#.PHONY: test_py
+#test_py:
+#	pytest
