@@ -1,0 +1,37 @@
+#!/bin/sh
+##
+# Find and run test units on shell scripts
+##
+
+TESTDIR="$(dirname "$0")"; export TESTDIR
+
+
+main() {
+	tests_failed='false'
+
+	printf 'Running Tests...\n'
+	for path in "$TESTDIR/shell_units/"*; do
+		file="$(basename "$path")"
+		# Skip files starting with and underscore
+		[ "$file" = "${file#_}" ] || continue
+
+		# Run test unit
+		printf '%15s:\t' "$file"
+		if ! sh "$path"; then
+			printf 'FAILED\n'
+			tests_failed='true'
+		else
+			printf 'Passed\n'
+		fi
+	done
+
+	# Test summary
+	if [ "$tests_failed" = 'true' ]; then
+		printf '!!! One or more tests failed. !!!\n'
+		return 1
+	fi
+	return 0
+}
+
+
+main "$@"

@@ -1,0 +1,58 @@
+#!/bin/sh
+##
+# Title:      Script Helpers (sh)
+# Copyright:  2020 Michael Lustfield <MTecknology>
+# License:    GPL-3+
+##
+
+
+# Print a formatted message and exit with non-zero status.
+# Usage: die [exit_status] message
+die() {
+        # If first argument was an integer, use as exit_status
+        if [ "$1" -eq "$1" ] 2>/dev/null; then
+                exit_status="$1"; shift
+        else
+                exit_status=1
+        fi
+
+        printf '*** CRITICAL: %s ***\n' "$1"
+        exit "$exit_status"
+}
+
+
+# Log a message to stdout if LOG_LEVEL(def:2) >= $level
+# Usage: log level message
+# - level => 0:debug, 1:info, *2:warn, 3:error
+log() {
+        if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
+                case "$1" in
+                        0) lvl='DEBUG';;
+                        1) lvl='INFO';;
+                        2) lvl='WARN';;
+                        3) lvl='ERROR';;
+                        *) lvl='UNKNOWN';;
+                esac
+
+                printf '*** %s: %s ***\n' "$lvl" "$2"
+        fi
+}
+
+
+# Returns '0' if ($str is 0) or (lower($1) == true)
+# Usage: is_true "$str"
+is_true() {
+        str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+        [ "$str" -eq '0' ] 2>/dev/null && return 0
+        [ "$str" = 'true' ] && return 0
+
+        return 1
+}
+
+
+# Returns '0' if ($str is 1) or (lower($1) != true)
+# Usage: is_false "$str"
+is_false() {
+        is_true "$1" && return 1
+        return 0
+}
