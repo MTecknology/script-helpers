@@ -5,12 +5,27 @@
 
 TESTDIR="$(dirname "$0")"; export TESTDIR
 
+TESTS_FAILED='false'
+
 
 main() {
-	tests_failed='false'
+	# Run tests
+	run_tests 'var' 'Variable'
+	run_tests 'fun' 'Function'
 
-	printf 'Running Tests...\n'
-	for path in "$TESTDIR/shell_units/"*; do
+	# Print summary
+	if [ "$TESTS_FFAILED" = 'true' ]; then
+		printf '!!! One or more tests failed. !!!\n'
+		return 1
+	fi
+	return 0
+}
+
+
+run_tests() {
+	printf 'Running %s Tests...\n' "$2"
+
+	for path in "$TESTDIR/shell_units/$1/"*; do
 		file="$(basename "$path")"
 		# Skip files starting with an underscore
 		[ "$file" = "${file#_}" ] || continue
@@ -19,18 +34,11 @@ main() {
 		printf '%15s:\t' "$file"
 		if ! sh "$path"; then
 			printf 'FAILED\n'
-			tests_failed='true'
+			TESTS_FFAILED='true'
 		else
 			printf 'Passed\n'
 		fi
 	done
-
-	# Test summary
-	if [ "$tests_failed" = 'true' ]; then
-		printf '!!! One or more tests failed. !!!\n'
-		return 1
-	fi
-	return 0
 }
 
 

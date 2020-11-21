@@ -7,6 +7,24 @@
 
 
 ##
+# Convenience Variables
+##
+
+# Log Levels
+DEBUG=0; D=0
+INFO=1; I=1
+WARN=2; W=2
+ERROR=3; E=3
+# shellcheck disable=SC2034  # Global Constants
+readonly D DEBUG I INFO W WARN E ERROR
+
+
+##
+# Helper Functions
+##
+
+
+##
 # Print a formatted (critical) message and exit with status
 #
 # **Usage:** die [exit_status] message
