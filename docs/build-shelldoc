@@ -44,7 +44,7 @@ with open(SHELL_DOC, 'w') as _out:
     with open(SHELL_LIB, 'r') as _in:
         builder = ''
         for line in _in.readlines():
-            if '() {\n' in line:
+            if '() {\n' in line and not line.startswith('_'):
                 command = line.split()[0]
                 _out.write('{}\n{}\n\n{}\n'.format(
                     command,

@@ -1,0 +1,34 @@
+#!/bin/sh
+##
+# Run tests for lock().
+##
+#set -x
+
+. "$TESTDIR/../lib/shell"
+
+
+# Create and destroy a lock
+(
+	lock acquire 'x'
+	lock destroy 'x'
+); [ "$?" = '0' ] || return 1
+
+# Creating a lock twice should fail
+(
+	lock acquire 'x'
+	lock acquire 'x'
+); [ "$?" = '1' ] || return 1
+# cleanup
+lock destroy 'x'
+
+# Check that default $2 == $0
+(
+	lock acquire "$0"
+	lock acquire
+); [ "$?" = '1' ] || return 1
+# cleanup
+lock destroy "$0"
+
+
+# Complete
+return 0

@@ -1,0 +1,31 @@
+Shell Samples
+=============
+
+Basic Skeleton::
+
+    #!/bin/sh
+    . /path/to/shell
+
+    # Check minimum helpers version
+    helper_version '1.0.0' || die 'Must have shell_helpers >= 1.0.0'
+
+    # Grab a lock
+    lock acquire "$0" || die 'Another process seems to be running.'
+
+    # Wipe temp job cache, if present
+    if [ -e '/tmp/razzle' ]; then
+        log "$INFO" 'Incomplete job detected; deleting,	
+        rm -rf '/tmp/razzle'
+    fi
+
+    log "$DEBUG" "Kicking things off at approx. $(date)."
+
+    # Kick off CI/CD process
+    #[...]
+
+    log "$INFO" 'SUCCESS: Razzle dazzle, baby!'
+
+    log "$DEBUG" "Ending things at exactly $(date)."
+
+    # Release the lock
+    lock destroy "$0"

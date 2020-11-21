@@ -73,6 +73,37 @@ die() {
 
 
 ##
+# Manage a lock file.
+#
+# **Usage:** lock operation [key]
+#
+# **Operation:** [acquire, destroy]
+#
+# **Key:** any unique value to identify this script (default: $0)
+#
+# **Returns:** true if success, else false
+##
+lock() {
+	_h="$(printf '%s' "${2:-$0}" | cksum | awk '{print $1}')"
+	case "$1" in
+		acquire) _lock_acquire "/tmp/$_h.lock";;
+		destroy) rm -f "/tmp/$_h.lock";;
+	esac
+}
+
+# Create and populate the lock file.
+_lock_acquire() {
+	# Check if running
+	[ -e "$1" ] && kill -0 "$(cat "$1")" && return 1
+
+	# make sure the lockfile is removed when we exit and then claim it
+	trap "rm -f $1; exit" INT TERM EXIT
+	echo $$ > "$1"
+
+	return 0
+}
+
+##
 # Print a formatted (critical) message if ENV[LOG_LEVEL] >= level.
 #
 # **Usage:** log level message
