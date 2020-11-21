@@ -1,0 +1,15 @@
+#!/bin/sh
+##
+# Run tests for detect_release().
+##
+#set -x
+
+. "$TESTDIR/../lib/shell"
+
+
+# Check that some release is detected
+( detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] && return 0
+
+
+# Complete
+return 0

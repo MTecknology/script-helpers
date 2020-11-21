@@ -1,0 +1,15 @@
+#!/bin/sh
+##
+# Run tests for detect_distro().
+##
+#set -x
+
+. "$TESTDIR/../lib/shell"
+
+
+# Check that some distro is detected
+( detect_distro; test -n "$H_DISTRO" ); [ "$?" = 0 ] && return 0
+
+
+# Complete
+return 0

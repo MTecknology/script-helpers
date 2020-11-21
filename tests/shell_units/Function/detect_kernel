@@ -1,0 +1,15 @@
+#!/bin/sh
+##
+# Run tests for detect_kernel().
+##
+#set -x
+
+. "$TESTDIR/../lib/shell"
+
+
+# Check that some kernel is detected
+( detect_kernel; test -n "$H_KERNEL" ); [ "$?" = 0 ] && return 0
+
+
+# Complete
+return 0

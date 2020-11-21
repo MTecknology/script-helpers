@@ -98,8 +98,8 @@ _lock_acquire() {
 	[ -e "$1" ] && kill -0 "$(cat "$1")" && return 1
 
 	# make sure the lockfile is removed when we exit and then claim it
-	# shellcheck disable=SC2064 #[is there a better way?]
-	trap "rm -f $1; exit" INT TERM EXIT
+	# shellcheck disable=SC2064 #[we want this expanding now]
+	trap "rm -f '$1'; exit" INT TERM EXIT
 	echo $$ > "$1"
 
 	return 0
@@ -142,9 +142,10 @@ log() {
 # **Returns:** true if all detections succeed
 ##
 detect_all() {
-	while read _line; do
+	grep '^detect_.+\(\)\s\{' "$0" |
+	  while read -r _line; do
 		eval "${_line%%(*}" || return 1
-	done < <(grep '^detect_.+\(\)\s\{' "$0")
+	done
 
 	return 0
 }
@@ -160,27 +161,12 @@ detect_all() {
 # **Exports*:** H_KERNEL
 ##
 detect_kernel() {
-	if [ -n "$OSTYPE" ]; then
-		_kern_ostype
-		[ -n "$H_KERNEL" ] && return 0
-	fi;if which uname >/dev/null; then
+	if command -v uname >/dev/null; then
 		_kern_uname
 		[ -n "$H_KERNEL" ] && return 0
 	fi
 
 	return 1
-}
-
-# Use $OSTYPE if present (newer systems).
-_kern_ostype() {
-	case "$OSTYPE" in
-		linux-gnu*) H_KERNEL='Linux';;
-		darwin*) H_KERNEL='Mac';;
-		freebsd*) H_KERNEL='FreeBSD';;
-		*) die 7 'Kernel detection failed.';;
-	esac
-
-	export H_KERNEL
 }
 
 # Use uname output to detect kernel.
@@ -206,7 +192,7 @@ detect_distro() {
 		_kern="$(detect_kernel; printf '%s' "$H_KERNEL")"
 	fi
 
-	if which lsb_release >/dev/null; then
+	if command -v lsb_release >/dev/null; then
 		_distro_lsb
 		[ -n "$H_DISTRO" ] && return 0
 	fi;if [ "$_kern" = 'FreeBSD' ]; then
@@ -240,10 +226,10 @@ _distro_freebsd() {
 # **Exports*:** H_RELEASE
 ##
 detect_release() {
-	if which lsb_release >/dev/null; then
+	if command -v lsb_release >/dev/null; then
 		_release_lsb
 		[ -n "$H_RELEASE" ] && return 0
-	fi;if which freebsd-version >/dev/null; then
+	fi;if command -v freebsd-version >/dev/null; then
 		_release_freebsd
 		[ -n "$H_RELEASE" ] && return 0
 	fi

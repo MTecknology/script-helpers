@@ -2,7 +2,7 @@
 ##
 # Run tests for lock().
 ##
-#set -x
+set -x
 
 . "$TESTDIR/../lib/shell"
 
