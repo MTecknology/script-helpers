@@ -1,0 +1,42 @@
+#!/bin/sh
+##
+# Run tests for version_compare().
+##
+#set -x
+
+. "$TESTDIR/../lib/shell"
+
+
+# Simple test of all operators
+( version_compare '1' 'lesser_than' '2' ); [ "$?" = '0' ] || return 1
+( version_compare '2' 'equal' '2' ); [ "$?" = '0' ] || return 1
+( version_compare '3' 'not_equal' '1' ); [ "$?" = '0' ] || return 1
+( version_compare '2' 'greater_than' '1' ); [ "$?" = '0' ] || return 1
+( version_compare '1' '-lt' '2' ); [ "$?" = '0' ] || return 1
+( version_compare '2' '-eq' '2' ); [ "$?" = '0' ] || return 1
+( version_compare '3' '-ne' '1' ); [ "$?" = '0' ] || return 1
+( version_compare '2' '-gt' '1' ); [ "$?" = '0' ] || return 1
+
+# Semver test of primary operators (expect true)
+( version_compare '7.0.1' '-lt' '7.0.2' ); [ "$?" = '0' ] || return 1
+( version_compare '7.0.2' '-eq' '7.0.2' ); [ "$?" = '0' ] || return 1
+( version_compare '3.0.2' '-ne' '2.0.7' ); [ "$?" = '0' ] || return 1
+( version_compare '7.0.2' '-gt' '7.0.1' ); [ "$?" = '0' ] || return 1
+
+# Semver test of primary operators (expect false)
+( version_compare '7.0.2' '-lt' '7.0.1' ); [ "$?" = '1' ] || return 1
+( version_compare '3.0.2' '-eq' '2.0.7' ); [ "$?" = '1' ] || return 1
+( version_compare '7.0.2' '-ne' '7.0.2' ); [ "$?" = '1' ] || return 1
+( version_compare '7.0.1' '-gt' '7.0.2' ); [ "$?" = '1' ] || return 1
+
+# Mismatched version strings (expect true)
+( version_compare '7' '-lt' '7.1' ); [ "$?" = '0' ] || return 1
+( version_compare '3' '-ne' '7.0.0' ); [ "$?" = '0' ] || return 1
+( version_compare '7.0.1' '-gt' '7' ); [ "$?" = '0' ] || return 1
+
+# Mismatched version strings (expect false)
+( version_compare '7.0.0' '-eq' '7.0' ); [ "$?" = '1' ] || return 1
+
+
+# Complete
+return 0

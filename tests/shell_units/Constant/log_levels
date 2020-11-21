@@ -1,6 +1,6 @@
 #!/bin/sh
 ##
-# Run tests for die().
+# Run tests for [DEBUG, D, INFO, I, WARN, W, ERROR, E].
 ##
 #set -x
 

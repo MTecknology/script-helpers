@@ -3,18 +3,19 @@
 # Find and run test units on shell scripts
 ##
 
+# Repository root
 TESTDIR="$(dirname "$0")"; export TESTDIR
-
-TESTS_FAILED='false'
 
 
 main() {
+	TESTS_FAILED='false'
+
 	# Run tests
-	run_tests 'var' 'Variable'
-	run_tests 'fun' 'Function'
+	run_tests 'Constant'
+	run_tests 'Function'
 
 	# Print summary
-	if [ "$TESTS_FFAILED" = 'true' ]; then
+	if [ "$TESTS_FAILED" = 'true' ]; then
 		printf '!!! One or more tests failed. !!!\n'
 		return 1
 	fi
@@ -23,7 +24,7 @@ main() {
 
 
 run_tests() {
-	printf 'Running %s Tests...\n' "$2"
+	printf 'Running %s Tests...\n' "$1"
 
 	for path in "$TESTDIR/shell_units/$1/"*; do
 		file="$(basename "$path")"
@@ -31,10 +32,10 @@ run_tests() {
 		[ "$file" = "${file#_}" ] || continue
 
 		# Run test unit
-		printf '%15s:\t' "$file"
-		if ! sh "$path"; then
+		printf '%24s:\t' "$file"
+		if ! (sh "$path"); then
 			printf 'FAILED\n'
-			TESTS_FFAILED='true'
+			TESTS_FAILED='true'
 		else
 			printf 'Passed\n'
 		fi

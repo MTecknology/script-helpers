@@ -1,6 +1,6 @@
 #!/bin/sh
 ##
-# Run tests for is_true().
+# Run tests for is_false().
 ##
 #set -x
 

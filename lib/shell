@@ -10,13 +10,18 @@
 # Convenience Variables
 ##
 
-# Log Levels
+SCRIPT_HELPER_VERSION='dev'
+# Version of this script
+readonly SCRIPT_HELPER_VERSION
+export SCRIPT_HELPER_VERSION
+
 DEBUG=0; D=0
 INFO=1; I=1
 WARN=2; W=2
 ERROR=3; E=3
-# shellcheck disable=SC2034  # Global Constants
+# Log Levels
 readonly D DEBUG I INFO W WARN E ERROR
+export D DEBUG I INFO W WARN E ERROR
 
 
 ##
@@ -25,7 +30,28 @@ readonly D DEBUG I INFO W WARN E ERROR
 
 
 ##
-# Print a formatted (critical) message and exit with status
+# Return true if script version is between min/max ('dev' == git_HEAD).
+#
+# **Usage:** helper_version min [max]
+#
+# **Returns:** true if script version is between min and [optionally:max]
+##
+helper_version() {
+	# Check minimum version
+	if [ "$SCRIPT_HELPER_VERSION" != 'dev' ]; then
+		version_compare "$SCRIPT_HELPER_VERSION" 'lesser_than' "$1" && return 1
+	fi
+
+	# Check maximum version
+	[ "${2:-dev}" = 'dev' ] && return 0
+	version_compare "$SCRIPT_HELPER_VERSION" 'greater_than' "$2" && return 1
+
+	return 0
+}
+
+
+##
+# Print a formatted (critical) message and exit with status.
 #
 # **Usage:** die [exit_status] message
 #
@@ -36,18 +62,18 @@ readonly D DEBUG I INFO W WARN E ERROR
 die() {
         # If first argument was an integer, use as exit_status
         if [ "$1" -eq "$1" ] 2>/dev/null; then
-                exit_status="$1"; shift
+                _exit_status="$1"; shift
         else
-                exit_status=1
+                _exit_status=1
         fi
 
         printf '*** CRITICAL: %s ***\n' "$1"
-        exit "$exit_status"
+        exit "$_exit_status"
 }
 
 
 ##
-# Print a formatted (critical) message if ENV[LOG_LEVEL] >= level
+# Print a formatted (critical) message if ENV[LOG_LEVEL] >= level.
 #
 # **Usage:** log level message
 #
@@ -75,7 +101,7 @@ log() {
 
 
 ##
-# Evaluate if a given string is true-like
+# Evaluate if a given string is true-like.
 #
 # **Usage:** is_true "$str"
 #
@@ -91,7 +117,7 @@ is_true() {
 
 
 ##
-# Evaluate if a given string is true-like
+# Evaluate if a given string is true-like.
 #
 # **Usage:** is_false "$str"
 #
@@ -100,4 +126,30 @@ is_true() {
 is_false() {
         is_true "$1" && return 1
         return 0
+}
+
+
+##
+# Compare two versions.
+#
+# **Usage:** ver1 operator ver2
+#
+# **Operators:** [-lt, lesser_than, -gt, greater_than, -eq, equal, -ne, not_equal]
+#
+# **Returns:** true if comparison statement is correct, else false
+##
+version_compare() {
+	case "$2" in
+		# Note: awk is wak... inverse operations so false=non-zero
+		lesser_than|-lt) _op='>';;
+		lesser_or_equal|-le) _op='<=';;
+		greater_than|-gt) _op='<';;
+		greater_or_equal|-ge) _op='<=';;
+		equal|-eq) _op='!=';;
+		not_equal|-ne) _op='==';;
+		*) die 'Unknown operatoration called for version_compare().';;
+	esac
+
+	# shellcheck disable=SC2086 #[false-positive: nested quotes]
+	return "$(awk 'BEGIN {print("'$1'" '$_op' "'$3'")}')"
 }

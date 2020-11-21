@@ -3,6 +3,8 @@
 Generate a documentation file from input "library" scripts.
 '''
 import os
+import re
+import subprocess
 import sys
 
 
@@ -15,12 +17,34 @@ if not os.path.exists(SHELL_LIB):
     print('{} not found in context: skipping'.format(SHELL_LIB))
     sys.exit(0)
 
-with open(SHELL_LIB, 'r') as _in:
-    with open(SHELL_DOC, 'w') as _out:
-        _out.write('Shell Helpers\n=============\n\n')
+with open(SHELL_DOC, 'w') as _out:
+
+    # Header
+    _out.write('Shell Helpers\n=============\n\n')
+
+    # Constants
+    _out.write('Constants\n---------\n\n')
+    proc = subprocess.Popen(
+            '. {}; export'.format(SHELL_LIB),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True)
+    exports = proc.communicate()[0].decode('utf-8')
+    with open(SHELL_LIB, 'r') as _in:
+        lines = ''.join(_in.readlines())
+    for m in re.findall(r'^#\s(.*?)$\n^readonly\s(.+)', lines, re.M):
+        _out.write('**{}:**\n\n'.format(m[0]))
+        for var in m[1].split():
+            _out.write('- {}: {}\n'.format(
+                var,
+                re.search(r'\s{}\=\'(.+?)\''.format(var), exports).group(1)))
+        _out.write('\n')
+
+    # Functions
+    with open(SHELL_LIB, 'r') as _in:
         builder = ''
         for line in _in.readlines():
-            if '()' in line:
+            if '() {\n' in line:
                 command = line.split()[0]
                 _out.write('{}\n{}\n\n{}\n'.format(
                     command,
