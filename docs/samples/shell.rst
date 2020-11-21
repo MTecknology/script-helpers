@@ -14,7 +14,7 @@ Basic Skeleton::
 
     # Wipe temp job cache, if present
     if [ -e '/tmp/razzle' ]; then
-        log "$INFO" 'Incomplete job detected; deleting,	
+        log "$INFO" 'Incomplete job detected; deleting...'
         rm -rf '/tmp/razzle'
     fi
 
@@ -23,7 +23,10 @@ Basic Skeleton::
     # Kick off CI/CD process
     #[...]
 
-    log "$INFO" 'SUCCESS: Razzle dazzle, baby!'
+    if is_true "$build_status"; then
+        log "$INFO" 'SUCCESS: Razzle dazzle, baby!'
+        #[...]
+    fi
 
     log "$DEBUG" "Ending things at exactly $(date)."
 

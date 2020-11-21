@@ -34,6 +34,9 @@ export D DEBUG I INFO W WARN E ERROR
 #
 # **Usage:** helper_version min [max]
 #
+# - min => minimum supported version
+# - max => maximum supported version
+#
 # **Returns:** true if script version is between min and [optionally:max]
 ##
 helper_version() {
@@ -54,6 +57,9 @@ helper_version() {
 # Print a formatted (critical) message and exit with status.
 #
 # **Usage:** die [exit_status] message
+#
+# - exit_status => exit code to use with script termination (default: 1)
+# - message => message to print before terminating script execution
 #
 # **Defaults:**
 #
@@ -77,9 +83,8 @@ die() {
 #
 # **Usage:** lock operation [key]
 #
-# **Operation:** [acquire, destroy]
-#
-# **Key:** any unique value to identify this script (default: $0)
+# - operation => acquire, destroy
+# - key => any unique value to identify this script (default: $0)
 #
 # **Returns:** true if success, else false
 ##
@@ -97,6 +102,7 @@ _lock_acquire() {
 	[ -e "$1" ] && kill -0 "$(cat "$1")" && return 1
 
 	# make sure the lockfile is removed when we exit and then claim it
+	# shellcheck disable=SC2064 #[is there a better way?]
 	trap "rm -f $1; exit" INT TERM EXIT
 	echo $$ > "$1"
 
@@ -108,13 +114,13 @@ _lock_acquire() {
 #
 # **Usage:** log level message
 #
+# - level => 0:debug, 1:info, \*2:warn, 3:error
+# - message => any string of text to be sent to stdout
+#
 # **Defaults:**
 #
 # - ENV[LOG_LEVEL]: 2
 #
-# **Parameter Options:**
-#
-# - level => 0:debug, 1:info, \*2:warn, 3:error
 ##
 log() {
         if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
@@ -134,7 +140,11 @@ log() {
 ##
 # Evaluate if a given string is true-like.
 #
-# **Usage:** is_true "$str"
+# **Usage:** is_true str
+#
+# **Parameter Options:**
+#
+# - str => any string to test against
 #
 # **Returns:** '0' if ($str is 0) or (lower($1) == true)
 ##
@@ -150,7 +160,9 @@ is_true() {
 ##
 # Evaluate if a given string is true-like.
 #
-# **Usage:** is_false "$str"
+# **Usage:** is_false str
+#
+# - str => any string to test against
 #
 # **Returns:** '0' if ($str is 1) or (lower($1) != true)
 ##
@@ -163,9 +175,10 @@ is_false() {
 ##
 # Compare two versions.
 #
-# **Usage:** ver1 operator ver2
+# **Usage:** version_compare ver1 operator ver2
 #
-# **Operators:** [-lt, lesser_than, -gt, greater_than, -eq, equal, -ne, not_equal]
+# - operator => [-lt, lesser_than, -gt, greater_than, -eq, equal, -ne, not_equal]
+# - var1 & var2 => arbitrary version strings to compare
 #
 # **Returns:** true if comparison statement is correct, else false
 ##
@@ -178,7 +191,7 @@ version_compare() {
 		greater_or_equal|-ge) _op='<=';;
 		equal|-eq) _op='!=';;
 		not_equal|-ne) _op='==';;
-		*) die 'Unknown operatoration called for version_compare().';;
+		*) die '2' 'Unknown operatoration called for version_compare().';;
 	esac
 
 	# shellcheck disable=SC2086 #[false-positive: nested quotes]

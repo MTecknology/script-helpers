@@ -6,6 +6,7 @@
    :maxdepth: 3
 
    helpers/shell
+   samples/shell
    development
 
 Script Helpers

@@ -37,6 +37,9 @@
 # Mismatched version strings (expect false)
 ( version_compare '7.0.0' '-eq' '7.0' ); [ "$?" = '1' ] || return 1
 
+# Invalid operation supplied
+( version_compare '2' '-inv' '1' >/dev/null); [ "$?" = '2' ] || return 1
+
 
 # Complete
 return 0
