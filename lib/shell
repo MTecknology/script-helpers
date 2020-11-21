@@ -34,8 +34,8 @@ export D DEBUG I INFO W WARN E ERROR
 #
 # **Usage:** helper_version min [max]
 #
-# - min => minimum supported version
-# - max => maximum supported version
+# - min: minimum supported version
+# - max: maximum supported version
 #
 # **Returns:** true if script version is between min and [optionally:max]
 ##
@@ -58,12 +58,8 @@ helper_version() {
 #
 # **Usage:** die [exit_status] message
 #
-# - exit_status => exit code to use with script termination (default: 1)
-# - message => message to print before terminating script execution
-#
-# **Defaults:**
-#
-# - exit_status: 1
+# - exit_status: exit code to use with script termination (default: 1)
+# - message: message to print before terminating script execution
 ##
 die() {
         # If first argument was an integer, use as exit_status
@@ -83,8 +79,8 @@ die() {
 #
 # **Usage:** lock operation [key]
 #
-# - operation => acquire, destroy
-# - key => any unique value to identify this script (default: $0)
+# - operation: acquire, destroy
+# - key: any unique value to identify this script (default: $0)
 #
 # **Returns:** true if success, else false
 ##
@@ -96,7 +92,7 @@ lock() {
 	esac
 }
 
-# Create and populate the lock file.
+# Create a lock file and populate it with PID.
 _lock_acquire() {
 	# Check if running
 	[ -e "$1" ] && kill -0 "$(cat "$1")" && return 1
@@ -109,13 +105,14 @@ _lock_acquire() {
 	return 0
 }
 
+
 ##
-# Print a formatted (critical) message if ENV[LOG_LEVEL] >= level.
+# Print a formatted message if ENV[LOG_LEVEL] >= level.
 #
 # **Usage:** log level message
 #
-# - level => 0:debug, 1:info, \*2:warn, 3:error
-# - message => any string of text to be sent to stdout
+# - level: 0:debug, 1:info, \*2:warn, 3:error
+# - message: any string of text to be sent to stdout
 #
 # **Defaults:**
 #
@@ -125,15 +122,220 @@ _lock_acquire() {
 log() {
         if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
                 case "$1" in
-                        0) lvl='DEBUG';;
-                        1) lvl='INFO';;
-                        2) lvl='WARN';;
-                        3) lvl='ERROR';;
-                        *) lvl='UNKNOWN';;
+                        0) _lvl='DEBUG';;
+                        1) _lvl='INFO';;
+                        2) _lvl='WARN';;
+                        3) _lvl='ERROR';;
+                        *) _lvl='UNKNOWN';;
                 esac
 
-                printf '*** %s: %s ***\n' "$lvl" "$2"
+                printf '*** %s: %s ***\n' "$_lvl" "$2"
         fi
+}
+
+
+##
+# Run all detection routines.
+#
+# **Usage:** detect_all
+#
+# **Returns:** true if all detections succeed
+##
+detect_all() {
+	while read _line; do
+		eval "${_line%%(*}" || return 1
+	done < <(grep '^detect_.+\(\)\s\{' "$0")
+
+	return 0
+}
+
+
+##
+# Detect kernel of running system.
+#
+# **Usage:** detect_kernel
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports*:** H_KERNEL
+##
+detect_kernel() {
+	if [ -n "$OSTYPE" ]; then
+		_kern_ostype
+		[ -n "$H_KERNEL" ] && return 0
+	fi;if which uname >/dev/null; then
+		_kern_uname
+		[ -n "$H_KERNEL" ] && return 0
+	fi
+
+	return 1
+}
+
+# Use $OSTYPE if present (newer systems).
+_kern_ostype() {
+	case "$OSTYPE" in
+		linux-gnu*) H_KERNEL='Linux';;
+		darwin*) H_KERNEL='Mac';;
+		freebsd*) H_KERNEL='FreeBSD';;
+		*) die 7 'Kernel detection failed.';;
+	esac
+
+	export H_KERNEL
+}
+
+# Use uname output to detect kernel.
+_kern_uname() {
+	H_KERNEL="$(uname --kernel-name)"
+	export H_KERNEL
+}
+
+
+##
+# Detect distribution of running system.
+#
+# **Usage:** detect_distro
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports*:** H_DISTRO
+##
+detect_distro() {
+	if [ -n "$H_KERNEL" ]; then
+		_kern="$H_KERNEL"
+	else
+		_kern="$(detect_kernel; printf '%s' "$H_KERNEL")"
+	fi
+
+	if which lsb_release >/dev/null; then
+		_distro_lsb
+		[ -n "$H_DISTRO" ] && return 0
+	fi;if [ "$_kern" = 'FreeBSD' ]; then
+		_distro_freebsd
+		[ -n "$H_DISTRO" ] && return 0
+	fi
+
+	return 1
+}
+
+# Detect release of Linux systems
+_distro_lsb() {
+	H_DISTRO="$(lsb_release --short --id)"
+	export H_DISTRO
+}
+
+# Detect release of FreeBSD systems
+_distro_freebsd() {
+	H_DISTRO='FreeBSD'
+	export H_DISTRO
+}
+
+
+##
+# Detect distro release of running system.
+#
+# **Usage:** detect_release
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports*:** H_RELEASE
+##
+detect_release() {
+	if which lsb_release >/dev/null; then
+		_release_lsb
+		[ -n "$H_RELEASE" ] && return 0
+	fi;if which freebsd-version >/dev/null; then
+		_release_freebsd
+		[ -n "$H_RELEASE" ] && return 0
+	fi
+
+	return 1
+}
+
+# Detect release version using lsb_release
+_release_lsb() {
+	H_RELEASE="$(lsb_release --short --release)"
+	export H_RELEASE
+}
+
+# Detect release of FreeBSD system
+_release_freebsd() {
+	H_RELEASE="$(freebsd-version -k)"
+	export H_RELEASE
+}
+
+
+##
+# Evaluate if running kernel matches provided argument(s).
+#
+# **Usage:** is_kernel match [match..]
+#
+# - match: any string to test against (Linux, BSD, etc.)
+#
+# **Returns:** true if running kernel matches a provided 'match'
+##
+is_kernel() {
+	if [ -n "$H_KERNEL" ]; then
+		_needle="$H_KERNEL"
+	else
+		_needle="$(detect_kernel; printf '%s' "$H_KERNEL")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect kernel.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+        return 1
+}
+
+
+##
+# Evaluate if running distribution matches provided argument(s).
+#
+# **Usage:** is_distro match [match..]
+#
+# - match: any string to test against (Debian, Ubuntu, RHEL, etc.)
+#
+# **Returns:** true if running distro matches a provided 'match'
+##
+is_distro() {
+	if [ -n "$H_DISTRO" ]; then
+		_needle="$H_DISTRO"
+	else
+		_needle="$(detect_distro; printf '%s' "$H_DISTRO")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect distro.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+        return 1
+}
+
+
+##
+# Evaluate if running distro release matches provided argument.
+#
+# **Usage:** is_release match [match..]
+#
+# - match: any string to test against (12.04, 10.1, etc.)
+#
+# **Returns:** true if running release matches a provided 'match'
+##
+is_release() {
+	if [ -n "$H_RELEASE" ]; then
+		_needle="$H_RELEASE"
+	else
+		_needle="$(detect_release; printf '%s' "$H_RELEASE")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect release.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+        return 1
 }
 
 
@@ -142,16 +344,14 @@ log() {
 #
 # **Usage:** is_true str
 #
-# **Parameter Options:**
-#
-# - str => any string to test against
+# - str: any string to test against
 #
 # **Returns:** '0' if ($str is 0) or (lower($1) == true)
 ##
 is_true() {
-        str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
-        [ "$str" -eq '0' ] 2>/dev/null && return 0
-        [ "$str" = 'true' ] && return 0
+        _str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+        [ "$_str" -eq '0' ] 2>/dev/null && return 0
+        [ "$_str" = 'true' ] && return 0
 
         return 1
 }
@@ -162,7 +362,7 @@ is_true() {
 #
 # **Usage:** is_false str
 #
-# - str => any string to test against
+# - str: any string to test against
 #
 # **Returns:** '0' if ($str is 1) or (lower($1) != true)
 ##
@@ -177,7 +377,7 @@ is_false() {
 #
 # **Usage:** version_compare ver1 operator ver2
 #
-# - operator => [-lt, lesser_than, -gt, greater_than, -eq, equal, -ne, not_equal]
+# - operator: [-lt, lesser_than, -gt, greater_than, -eq, equal, -ne, not_equal]
 # - var1 & var2 => arbitrary version strings to compare
 #
 # **Returns:** true if comparison statement is correct, else false
@@ -191,7 +391,7 @@ version_compare() {
 		greater_or_equal|-ge) _op='<=';;
 		equal|-eq) _op='!=';;
 		not_equal|-ne) _op='==';;
-		*) die '2' 'Unknown operatoration called for version_compare().';;
+		*) die 7 'Unknown operatoration called for version_compare().';;
 	esac
 
 	# shellcheck disable=SC2086 #[false-positive: nested quotes]

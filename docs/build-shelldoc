@@ -9,12 +9,12 @@ import sys
 
 
 WORKSPACE = os.environ.get('WORKSPACE', './')
-SHELL_LIB = '{}/lib/shell'.format(WORKSPACE)
-SHELL_DOC = '{}/docs/helpers/shell.rst'.format(WORKSPACE)
+SHELL_LIB = f'{WORKSPACE}/lib/shell'
+SHELL_DOC = f'{WORKSPACE}/docs/helpers/shell.rst'
 
 
 if not os.path.exists(SHELL_LIB):
-    print('{} not found in context: skipping'.format(SHELL_LIB))
+    print(f'{SHELL_LIB} not found in context: skipping')
     sys.exit(0)
 
 with open(SHELL_DOC, 'w') as _out:
@@ -25,7 +25,7 @@ with open(SHELL_DOC, 'w') as _out:
     # Constants
     _out.write('Constants\n---------\n\n')
     proc = subprocess.Popen(
-            '. {}; export'.format(SHELL_LIB),
+            f'. {SHELL_LIB}; export',
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=True)
