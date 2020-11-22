@@ -2,32 +2,36 @@
 ##
 # Run tests for lock().
 ##
-set -x
+#set -x
 
 . "$TESTDIR/../lib/shell"
 
 
-# Create and destroy a lock
-(
-	lock acquire 'x'
-	lock destroy 'x'
-); [ "$?" = '0' ] || return 1
-
-# Creating a lock twice should fail
-(
-	lock acquire 'x'
-	lock acquire 'x'
-); [ "$?" = '1' ] || return 1
-# cleanup
+##
+# Integration sequence
+# NOTE: 'trap' causes a zero-exit
+##
+# Prep
 lock destroy 'x'
-
-# Check that default $2 == $0
-(
-	lock acquire "$0"
-	lock acquire
-); [ "$?" = '1' ] || return 1
-# cleanup
+lock destroy 'z'
 lock destroy "$0"
+lock destroy
+# Create a lock (pass)
+lock acquire 'x' || return 1
+# Attempt to create the same lock (fail)
+lock acquire 'x' && return 1
+# Create a second lock (pass)
+lock acquire 'z' || return 1
+# Destroy the second lock (pass)
+lock destroy 'z' || return 1
+# Create another second lock using default_$0 (pass)
+lock acquire || return 1
+# Create another second lock using explicit_$0 (fail)
+lock acquire "$0" && return 1
+# Destroy $0 lock (pass)
+lock destroy || return 1
+# Destroy original lock (pass)
+lock destroy 'x'
 
 
 # Complete
