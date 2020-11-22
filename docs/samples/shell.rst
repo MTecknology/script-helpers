@@ -1,7 +1,10 @@
 Shell Samples
 =============
 
-Basic Skeleton::
+Basic Skeleton
+--------------
+
+.. code-block:: sh
 
     #!/bin/sh
     . /path/to/shell

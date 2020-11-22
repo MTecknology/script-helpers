@@ -10,18 +10,18 @@
 # Convenience Variables
 ##
 
-SCRIPT_HELPER_VERSION='dev'
 # Version of this script
+SCRIPT_HELPER_VERSION='dev'
 readonly SCRIPT_HELPER_VERSION
 export SCRIPT_HELPER_VERSION
 
+# Log Levels
 DEBUG=0; D=0
 INFO=1; I=1
 WARN=2; W=2
 ERROR=3; E=3
-# Log Levels
-readonly D DEBUG I INFO W WARN E ERROR
-export D DEBUG I INFO W WARN E ERROR
+readonly DEBUG D INFO I WARN W ERROR E
+export DEBUG D INFO I WARN W ERROR E
 
 
 ##
@@ -82,7 +82,7 @@ die() {
 # - operation: acquire, destroy
 # - key: any unique value to identify this script (default: $0)
 #
-# **Returns:** true if success, else false
+# **Returns:** true if success
 ##
 lock() {
 	_h="$(printf '%s' "${2:-$0}" | cksum | awk '{print $1}')"
@@ -158,7 +158,7 @@ detect_all() {
 #
 # **Returns:** true if detection succeeds
 #
-# **Exports*:** H_KERNEL
+# **Exports:** H_KERNEL
 ##
 detect_kernel() {
 	if command -v uname >/dev/null; then
@@ -183,7 +183,7 @@ _kern_uname() {
 #
 # **Returns:** true if detection succeeds
 #
-# **Exports*:** H_DISTRO
+# **Exports:** H_DISTRO
 ##
 detect_distro() {
 	if [ -n "$H_KERNEL" ]; then
@@ -223,7 +223,7 @@ _distro_freebsd() {
 #
 # **Returns:** true if detection succeeds
 #
-# **Exports*:** H_RELEASE
+# **Exports:** H_RELEASE
 ##
 detect_release() {
 	if command -v lsb_release >/dev/null; then
@@ -332,7 +332,7 @@ is_release() {
 #
 # - str: any string to test against
 #
-# **Returns:** '0' if ($str is 0) or (lower($1) == true)
+# **Returns:** true if ($str is 0) or (lower($str) == true)
 ##
 is_true() {
         _str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
@@ -350,7 +350,7 @@ is_true() {
 #
 # - str: any string to test against
 #
-# **Returns:** '0' if ($str is 1) or (lower($1) != true)
+# **Returns:** true if ($str != 0) or (lower($str) != true)
 ##
 is_false() {
         is_true "$1" && return 1
@@ -364,9 +364,9 @@ is_false() {
 # **Usage:** version_compare ver1 operator ver2
 #
 # - operator: [-lt, lesser_than, -gt, greater_than, -eq, equal, -ne, not_equal]
-# - var1 & var2 => arbitrary version strings to compare
+# - ver{1,2}: arbitrary version strings to compare
 #
-# **Returns:** true if comparison statement is correct, else false
+# **Returns:** true if comparison statement is correct
 ##
 version_compare() {
 	case "$2" in

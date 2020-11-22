@@ -32,8 +32,12 @@ with open(SHELL_DOC, 'w') as _out:
     exports = proc.communicate()[0].decode('utf-8')
     with open(SHELL_LIB, 'r') as _in:
         lines = ''.join(_in.readlines())
-    for m in re.findall(r'^#\s(.*?)$\n^readonly\s(.+)', lines, re.M):
-        _out.write('**{}:**\n\n'.format(m[0]))
+    #for m in re.findall(r'^#\s(.*?)$\n^readonly\s(.+)', lines, re.M):
+    for m in re.findall(r'\n\n^#\s(.+?)$.+?readonly\s(.+?)$', lines, re.M|re.S):
+        #_out.write('**{}:**\n\n'.format(m[0]))
+        _out.write('{}\n{}\n'.format(
+            m[0],
+            ''.join(['+' for _ in m[0]])))
         for var in m[1].split():
             _out.write('- {}: {}\n'.format(
                 var,
@@ -42,13 +46,14 @@ with open(SHELL_DOC, 'w') as _out:
 
     # Functions
     with open(SHELL_LIB, 'r') as _in:
+        _out.write('Functions\n---------\n\n')
         builder = ''
         for line in _in.readlines():
             if '() {\n' in line and not line.startswith('_'):
-                command = line.split()[0]
+                command = line.split('(')[0]
                 _out.write('{}\n{}\n\n{}\n'.format(
                     command,
-                    ''.join(['-' for _ in command]),
+                    ''.join(['+' for _ in command]),
                     builder))
                 continue
             if line.startswith('##'):
