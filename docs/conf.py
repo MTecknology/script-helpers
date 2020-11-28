@@ -34,6 +34,7 @@ language = 'en'
 today_fmp = '%d %b %Y'
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosectionlabel',
     #'sphinx.ext.coverage',
     #'sphinx.ext.viewcode',
 ]

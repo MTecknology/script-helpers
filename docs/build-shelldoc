@@ -20,6 +20,7 @@ if not os.path.exists(SHELL_LIB):
 with open(SHELL_DOC, 'w') as _out:
 
     # Header
+    _out.write('.. _helpers_shell:\n\n')
     _out.write('Shell Helpers\n=============\n\n')
 
     # Constants

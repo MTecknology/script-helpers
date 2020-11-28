@@ -38,6 +38,11 @@ export DEBUG D INFO I WARN W ERROR E
 # - max: maximum supported version
 #
 # **Returns:** true if script version is between min and [optionally:max]
+#
+# .. code-block:: sh
+#
+#    helper_version '1.0.0' '1.999' ||
+#            die 'Helper version 1.x required!'
 ##
 helper_version() {
 	# Check minimum version
@@ -61,6 +66,10 @@ helper_version() {
 #
 # - exit_status: exit code to use with script termination (default: 1)
 # - message: message to print before terminating script execution
+#
+# .. code-block:: sh
+#
+#    [ -n "$foo" ] || die 255 '$foo not defined'
 ##
 die() {
         # If first argument was an integer, use as exit_status
@@ -83,6 +92,12 @@ die() {
 # - key: any unique value to identify this script (default: $0)
 #
 # **Returns:** true if success
+#
+# .. code-block:: sh
+#
+#    lock aquire "$0" || die 'Unable to grab lock'
+#    [...]
+#    lock destroy "$0"
 ##
 lock() {
 	_h="$(printf '%s' "${2:-$0}" | cksum | awk '{print $1}')"
@@ -118,6 +133,11 @@ _lock_acquire() {
 #
 # - ENV[LOG_LEVEL]: 2
 #
+#
+# .. code-block:: sh
+#
+#    log "$INFO" 'Capturing quantum stabilizer'
+#    capture_qs || die 'Capture failed!'
 ##
 log() {
         if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
@@ -140,6 +160,10 @@ log() {
 # **Usage:** detect_all
 #
 # **Returns:** true if all detections succeed
+#
+# .. code-block:: sh
+#
+#    detect all || die 'Detections failed'
 ##
 detect_all() {
 	grep '^detect_.+\(\)\s\{' "$0" |
@@ -159,6 +183,10 @@ detect_all() {
 # **Returns:** true if detection succeeds
 #
 # **Exports:** H_KERNEL
+#
+# .. code-block:: sh
+#
+#    detect_kernel || die 'Kernel is not supported'
 ##
 detect_kernel() {
 	if command -v uname >/dev/null; then
@@ -184,6 +212,10 @@ _kern_uname() {
 # **Returns:** true if detection succeeds
 #
 # **Exports:** H_DISTRO
+#
+# .. code-block:: sh
+#
+#    detect_distro || die 'Distro is not supported'
 ##
 detect_distro() {
 	if [ -n "$H_KERNEL" ]; then
@@ -224,6 +256,10 @@ _distro_freebsd() {
 # **Returns:** true if detection succeeds
 #
 # **Exports:** H_RELEASE
+#
+# .. code-block:: sh
+#
+#    detect_release || die 'Release is not supported'
 ##
 detect_release() {
 	if command -v lsb_release >/dev/null; then
@@ -258,6 +294,10 @@ _release_freebsd() {
 # - match: any string to test against (Linux, BSD, etc.)
 #
 # **Returns:** true if running kernel matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_kernel 'Linux' 'BSD' || die 'Only Linux/BSD are supported'
 ##
 is_kernel() {
 	if [ -n "$H_KERNEL" ]; then
@@ -283,6 +323,10 @@ is_kernel() {
 # - match: any string to test against (Debian, Ubuntu, RHEL, etc.)
 #
 # **Returns:** true if running distro matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_distro 'Debian' || die 'Only Debian is supported'
 ##
 is_distro() {
 	if [ -n "$H_DISTRO" ]; then
@@ -308,6 +352,11 @@ is_distro() {
 # - match: any string to test against (12.04, 10.1, etc.)
 #
 # **Returns:** true if running release matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_release '14.04' '16.04' '18.04' '20.04' ||
+#            die 'Only non-EOL LTS releases are supported'
 ##
 is_release() {
 	if [ -n "$H_RELEASE" ]; then
@@ -333,6 +382,10 @@ is_release() {
 # - str: any string to test against
 #
 # **Returns:** true if ($str is 0) or (lower($str) == true)
+#
+# .. code-block:: sh
+#
+#    is_true "$foo" || die "\$foo said it isn't so..."
 ##
 is_true() {
         _str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
@@ -351,6 +404,10 @@ is_true() {
 # - str: any string to test against
 #
 # **Returns:** true if ($str != 0) or (lower($str) != true)
+#
+# .. code-block:: sh
+#
+#    is_false 'lies' || die 'I am too gullible'
 ##
 is_false() {
         is_true "$1" && return 1
@@ -374,16 +431,21 @@ is_false() {
 #
 # - version{1,2}: arbitrary version strings to compare
 #
-# **Version Format:** ``[0-9]+($VERSION_SEPARATOR[0-9]+)*`` (i.e. 1, 1.0, 90, 1.2.3.4)
+# **Version Format:** ``[0-9]+($VERSION_SEPARATOR[0-9]+)*`` (i.e. 90, 1.2.3.4)
 #
 # **Returns:** true if comparison statement is correct
+#
+# .. code-block:: sh
+#
+#    version_compare "$_version" '-lt' '1.0' ||
+#        die 'Unexpected (pre-release) version found'
 ##
 version_compare() {
 	_largest_version "$1" "$3"; _cmp="$(printf '%s' "$?")"
 
 	# Check for valid responses or bail early
 	case "$_cmp" in
-		(1|0|2) :;;
+		(1|0|2) :;;     # Expected (valid) resturn values
 		(*) die "$_cmp" 'version comparison failed';;
 	esac
 
