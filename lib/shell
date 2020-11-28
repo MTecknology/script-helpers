@@ -88,8 +88,8 @@ die() {
 lock() {
 	_h="$(printf '%s' "${2:-$0}" | cksum | awk '{print $1}')"
 	case "$1" in
-		acquire) _lock_acquire "/tmp/$_h.lock";;
-		destroy) rm -f "/tmp/$_h.lock";;
+		(acquire) _lock_acquire "/tmp/$_h.lock";;
+		(destroy) rm -f "/tmp/$_h.lock";;
 	esac
 }
 
@@ -123,11 +123,11 @@ _lock_acquire() {
 log() {
         if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
                 case "$1" in
-                        0) _lvl='DEBUG';;
-                        1) _lvl='INFO';;
-                        2) _lvl='WARN';;
-                        3) _lvl='ERROR';;
-                        *) _lvl='UNKNOWN';;
+                        (0) _lvl='DEBUG';;
+                        (1) _lvl='INFO';;
+                        (2) _lvl='WARN';;
+                        (3) _lvl='ERROR';;
+                        (*) _lvl='UNKNOWN';;
                 esac
 
                 printf '*** %s: %s ***\n' "$_lvl" "$2"
@@ -384,34 +384,34 @@ version_compare() {
 
 	# Check for valid responses or bail early
 	case "$_cmp" in
-		1|0|2) :;;
-		*) die "$_cmp" 'version comparison failed';;
+		(1|0|2) :;;
+		(*) die "$_cmp" 'version comparison failed';;
 	esac
 
 	# The easy part
 	case "$2" in
-		'lesser_than'|'-lt'|'<')
+		('lesser_than'|'-lt'|'<')
 			[ "$_cmp" = '2' ] && return 0
 			;;
-		'lesser_or_equal'|'-le'|'<=')
+		('lesser_or_equal'|'-le'|'<=')
 			[ "$_cmp" = '0' ] && return 0
 			[ "$_cmp" = '2' ] && return 0
 			;;
-		'greater_than'|'-gt'|'>')
+		('greater_than'|'-gt'|'>')
 			[ "$_cmp" = '1' ] && return 0
 			;;
-		'greater_or_equal'|'-ge'|'>=')
+		('greater_or_equal'|'-ge'|'>=')
 			[ "$_cmp" = '1' ] && return 0
 			[ "$_cmp" = '0' ] && return 0
 			;;
-		'equal'|'-eq'|'==')
+		('equal'|'-eq'|'==')
 			[ "$_cmp" = '0' ] && return 0
 			;;
-		'not_equal'|'-ne'|'!=')
+		('not_equal'|'-ne'|'!=')
 			[ "$_cmp" = '1' ] && return 0
 			[ "$_cmp" = '2' ] && return 0
 			;;
-		*) die 7 'Unknown operatoration called for version_compare().';;
+		(*) die 7 'Unknown operatoration called for version_compare().';;
 	esac
 	return 1
 }
@@ -437,20 +437,20 @@ _largest_version() (
 	# Split versions on VER_SEP into int/sub
 	_v="$1$2"
 	_v1="$1"
-	_s1="${1#*$VERSION_SEPARATOR}"
+	_s1="${1#*"$VERSION_SEPARATOR"}"
 	if [ "$_v1" = "$_s1" ]; then
 		_s1=''
 		_m1="$_v1"
 	else
-		_m1="${1%%$VERSION_SEPARATOR*}"
+		_m1="${1%%"$VERSION_SEPARATOR"*}"
 	fi
 	_v2="$2"
-	_s2="${2#*$VERSION_SEPARATOR}"
+	_s2="${2#*"$VERSION_SEPARATOR"}"
 	if [ "$_v2" = "$_s2" ]; then
 		_s2=''
 		_m2="$_v2"
 	else
-		_m2="${2%%$VERSION_SEPARATOR*}"
+		_m2="${2%%"$VERSION_SEPARATOR"*}"
 	fi
 
 	# Both are equal
@@ -465,13 +465,13 @@ _largest_version() (
 
 	# Check for invalid
 	case "$_m1$_m2" in
-		*[!0-9]*)
+		(*[!0-9]*)
 			die 7 'version_compare called with unsupported version type'
 			;;
 	esac
 
 	# If a ver_sep is present
-	if [ "${_v#*$VERSION_SEPARATOR}" != "$_v" ]; then
+	if [ "${_v#*"$VERSION_SEPARATOR"}" != "$_v" ]; then
 		# Check for a larger "major" version number
 		[ "$_m1" -lt "$_m2" ] && return 2
 		[ "$_m1" -gt "$_m2" ] && return 1

@@ -35,3 +35,13 @@ these issues, the following form should be used:
 **quotes:**
 
 Use them!
+
+**case:**
+
+A leading ``(`` for each component is optional. For the sake of syntax
+highlighting and making a choice... it's not optional.
+
+**subshells:**
+
+Do not use subshells unless absolutely necessary. These can potentially hide
+errors, return codes, etc.
