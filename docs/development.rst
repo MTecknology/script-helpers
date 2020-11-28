@@ -45,3 +45,8 @@ highlighting and making a choice... it's not optional.
 
 Do not use subshells unless absolutely necessary. These can potentially hide
 errors, return codes, etc.
+
+**0-9 vs. 123..:**
+
+In ``case`` statements, spell out ``[0123456789])`` instead of ``[0-9])``. Some
+very obsure locales have extra characters between 0 and 9.
