@@ -47,6 +47,7 @@ helper_version() {
 
 	# Check maximum version
 	[ "${2:-dev}" = 'dev' ] && return 0
+	[ "$SCRIPT_HELPER_VERSION" = 'dev' ] && return 1
 	version_compare "$SCRIPT_HELPER_VERSION" 'greater_than' "$2" && return 1
 
 	return 0
@@ -361,25 +362,112 @@ is_false() {
 ##
 # Compare two versions.
 #
-# **Usage:** version_compare ver1 operator ver2
+# **Usage:** version_compare version1 operator version2
 #
-# - operator: [-lt, lesser_than, -gt, greater_than, -eq, equal, -ne, not_equal]
-# - ver{1,2}: arbitrary version strings to compare
+# - operator:
+#
+#   + ``lesser_than``, ``-lt``, ``<``
+#   + ``lesser_than_or_equal``, ``-le``, ``<=``
+#   + ``greater_than``, ``-gt``, ``>``
+#   + ``greater_than_or_equal``, ``-ge``, ``>=``
+#   + ``equal``, ``-eq``, ``==``
+#   + ``not_equal``, ``-ne``, ``!=``
+#
+# - version{1,2}: arbitrary version strings to compare
+#
+# **Version Format:** ``[0-9]+($VERSION_SEPARATOR[0-9]+)*`` (i.e. 1, 1.0, 90, 1.2.3.4)
 #
 # **Returns:** true if comparison statement is correct
 ##
 version_compare() {
+	_cmp="$(_largest_version "$1" "$3"; printf '%s' "$?")"
 	case "$2" in
-		# Note: awk is wak... inverse operations so false=non-zero
-		lesser_than|-lt) _op='>';;
-		lesser_or_equal|-le) _op='<=';;
-		greater_than|-gt) _op='<';;
-		greater_or_equal|-ge) _op='<=';;
-		equal|-eq) _op='!=';;
-		not_equal|-ne) _op='==';;
+		'lesser_than'|'-lt'|'<')
+			[ "$_cmp" = '2' ] && return 0
+			;;
+		'lesser_or_equal'|'-le'|'<=')
+			[ "$_cmp" = '0' ] && return 0
+			[ "$_cmp" = '2' ] && return 0
+			;;
+		'greater_than'|'-gt'|'>')
+			[ "$_cmp" = '1' ] && return 0
+			;;
+		'greater_or_equal'|'-ge'|'>=')
+			[ "$_cmp" = '1' ] && return 0
+			[ "$_cmp" = '0' ] && return 0
+			;;
+		'equal'|'-eq'|'==')
+			[ "$_cmp" = '0' ] && return 0
+			;;
+		'not_equal'|'-ne'|'!=')
+			[ "$_cmp" = '1' ] && return 0
+			[ "$_cmp" = '2' ] && return 0
+			;;
 		*) die 7 'Unknown operatoration called for version_compare().';;
 	esac
-
-	# shellcheck disable=SC2086 #[false-positive: nested quotes]
-	return "$(awk 'BEGIN {print("'$1'" '$_op' "'$3'")}')"
+	return 1
 }
+
+##
+# Compare two versions.
+# Check if one version is larger/smaller/equal than/to another.
+#
+# **Usage:** _largest_version ver1 ver2
+#
+# Returns: ($1 > $2): 1 ; ($1 = $2): 0 ; ($1 < $2): 2
+# [IOW- 1 = $1 is largest; 0 = neither ; 2 = $2 is largest]
+##
+_largest_version() (
+	# Value used to separate version components
+	VERSION_SEPARATOR="${VERSION_SEPARATOR:-.}"
+
+	# Split versions on VER_SEP into int/sub
+	_v="$1$2"
+	_v1="$1"
+	_s1="${1#*$VERSION_SEPARATOR}"
+	if [ "$_v1" = "$_s1" ]; then
+		_s1=''
+		_m1="$_v1"
+	else
+		_m1="${1%%$VERSION_SEPARATOR*}"
+	fi
+	_v2="$2"
+	_s2="${2#*$VERSION_SEPARATOR}"
+	if [ "$_v2" = "$_s2" ]; then
+		_s2=''
+		_m2="$_v2"
+	else
+		_m2="${2%%$VERSION_SEPARATOR*}"
+	fi
+
+	# Both are equal
+	[ "$_v1" = "$_v2" ] && return 0
+
+	# Something is larger than nothing (30 < 30.0)
+	if [ -n "$_v1" ] && [ ! -n "$_v2" ]; then
+		return 1
+	elif [ ! -n "$_v1" ] && [ -n "$_v2" ]; then
+		return 2
+	fi
+
+	# Check for invalid
+	case "$_m1$_m2" in
+		*[!0-9]*)
+			die 7 'version_compare called with unsupported version type'
+			;;
+	esac
+
+	# If a ver_sep is present
+	if [ "${_v#*$VERSION_SEPARATOR}" != "$_v" ]; then
+		# Check for a larger "major" version number
+		[ "$_m1" -lt "$_m2" ] && return 2
+		[ "$_m1" -gt "$_m2" ] && return 1
+
+		# Compare substring components
+		_largest_version "$_s1" "$_s2"; return "$?"
+	else
+		# Only integers present; simple integer comparison
+		[ "$_v1" -lt "$_v2" ] && return 2
+		[ "$_v1" -gt "$_v2" ] && return 1
+	fi
+)

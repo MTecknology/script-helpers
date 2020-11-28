@@ -8,38 +8,40 @@ ORIG="$TESTDIR/../lib/shell"
 NEW="$(mktemp)"
 export ORIG NEW
 
+cleanup() {
+	rm -f "$NEW"
+}
+
 
 # Check that dev is treated as "highest" version
 (
 	cat "$ORIG" >"$NEW";
 	. "$NEW";
 	helper_version '0.0.3' '0.0.9'
-); [ "$?" = '1' ] || return 1
+); [ "$?" = '1' ] || (cleanup; return 1)
 
 # Check valid minimum w/ maximum on released version (min < rel < max)
 (
 	sed '/^SCRIPT_HELPER_VERSION/s/dev/0.0.5/' "$ORIG" >"$NEW";
 	. "$NEW";
 	helper_version '0.0.3' '0.0.9'
-); [ "$?" = '0' ] || return 1
+); [ "$?" = '0' ] || (cleanup; return 1)
 
 # Check valid minimum w/ maximum on released version (_ < rel < min)
 (
 	sed '/^SCRIPT_HELPER_VERSION/s/dev/0.0.1/' "$ORIG" >"$NEW";
 	. "$NEW";
 	helper_version '0.0.3' '0.0.9'
-); [ "$?" = '1' ] || return 1
+); [ "$?" = '1' ] || (cleanup; return 1)
 
 # Check valid minimum w/ maximum on released version (max < rel < _)
 (
 	sed '/^SCRIPT_HELPER_VERSION/s/dev/0.0.20/' "$ORIG" >"$NEW";
 	. "$NEW";
 	helper_version '0.0.3' '0.0.9'
-); [ "$?" = '1' ] || return 1
+); [ "$?" = '1' ] || (cleanup; return 1)
 
-
-# Cleanup
-rm -f "$NEW"
 
 # Complete
+cleanup
 return 0

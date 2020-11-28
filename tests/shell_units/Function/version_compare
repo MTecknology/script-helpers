@@ -18,6 +18,7 @@
 ( version_compare '2' '-gt' '1' ); [ "$?" = '0' ] || return 1
 
 # Semver test of primary operators (expect true)
+#set -x
 ( version_compare '7.0.1' '-lt' '7.0.2' ); [ "$?" = '0' ] || return 1
 ( version_compare '7.0.2' '-eq' '7.0.2' ); [ "$?" = '0' ] || return 1
 ( version_compare '3.0.2' '-ne' '2.0.7' ); [ "$?" = '0' ] || return 1
@@ -40,6 +41,32 @@
 # Invalid operation supplied
 ( version_compare '2' '-inv' '1' >/dev/null); [ "$?" = '7' ] || return 1
 
+# "how does that handle comparing 10.0.0 (not a number) to 2.0 (a number)?"
+( version_compare '10.0.0' '-lt' '2.0' ); [ "$?" = '1' ] || return 1
+( version_compare '10.0' '-gt' '2.0.0' ); [ "$?" = '0' ] || return 1
+
+# not less/greater-than... but equal
+( version_compare '7' '-lt' '7' ); [ "$?" = '1' ] || return 1
+( version_compare '7' '-gt' '7' ); [ "$?" = '1' ] || return 1
+
+# String vs. numerical comparison
+( version_compare '1.18.1' '-gt' '1.8.1' ); [ "$?" = '0' ] || return 1
+
+
+# Random tests found on the internet
+( version_compare '1' '==' '1' ); [ "$?" = '0' ] || return 1
+( version_compare '2.1' '<' '2.2' ); [ "$?" = '0' ] || return 1
+( version_compare '3.0.4.10' '>' '3.0.4.2' ); [ "$?" = '0' ] || return 1
+( version_compare '4.08' '<' '4.08.01' ); [ "$?" = '0' ] || return 1
+( version_compare '3.2.1.9.8144' '>' '3.2' ); [ "$?" = '0' ] || return 1
+( version_compare '3.2' '<' '3.2.1.9.8144' ); [ "$?" = '0' ] || return 1
+( version_compare '1.2' '<' '2.1' ); [ "$?" = '0' ] || return 1
+( version_compare '2.1' '>' '1.2' ); [ "$?" = '0' ] || return 1
+( version_compare '5.6.7' '==' '5.6.7' ); [ "$?" = '0' ] || return 1
+( version_compare '1.01.1' '==' '1.1.1' ); [ "$?" = '0' ] || return 1
+( version_compare '1.1.1' '==' '1.01.1' ); [ "$?" = '0' ] || return 1
+( version_compare '1' '!=' '1.0' ); [ "$?" = '0' ] || return 1
+( version_compare '1.0.0' '!=' '1.0' ); [ "$?" = '0' ] || return 1
 
 # Complete
 return 0
