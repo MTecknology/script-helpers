@@ -79,7 +79,7 @@ Basic Skeleton
     Usage: script_name [options]
 
     Options:
-      -i X\tExports CICD_MAGIC_ID for build process. (default: empty)
+      -i X\tExports CICD_MAGIC_ID for build process
       -h\tPrint this help text and exit
     EOF
     }

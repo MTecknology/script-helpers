@@ -3,7 +3,8 @@ export WORKSPACE ?= $(abspath $(PWD)/)
 # Clean up build artifacts
 .PHONY: clean
 clean:
-	rm -rf _build docs/helpers/*.rst
+	@#rm -rf _build docs/helpers/*.rst
+	git clean -fxd
 
 # Build documentation
 .PHONY: docs
