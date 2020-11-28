@@ -365,12 +365,12 @@ is_false() {
 #
 # - operator:
 #
-#   + ``lesser_than``, ``-lt``, ``<``
-#   + ``lesser_than_or_equal``, ``-le``, ``<=``
-#   + ``greater_than``, ``-gt``, ``>``
-#   + ``greater_than_or_equal``, ``-ge``, ``>=``
-#   + ``equal``, ``-eq``, ``==``
-#   + ``not_equal``, ``-ne``, ``!=``
+#   + ``-lt``, ``<``, ``lesser_than``
+#   + ``-le``, ``<=``, ``lesser_than_or_equal``
+#   + ``-gt``, ``>``, ``greater_than``
+#   + ``-ge``, ``>=``, ``greater_than_or_equal``
+#   + ``-eq``, ``==``, ``equal``
+#   + ``-ne``, ``!=``, ``not_equal``
 #
 # - version{1,2}: arbitrary version strings to compare
 #
