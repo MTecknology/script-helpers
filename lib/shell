@@ -380,7 +380,15 @@ is_false() {
 # **Returns:** true if comparison statement is correct
 ##
 version_compare() {
-	_cmp="$(_largest_version "$1" "$3"; printf '%s' "$?")"
+	_largest_version "$1" "$3"; _cmp="$(printf '%s' "$?")"
+
+	# Check for valid responses or bail early
+	case "$_cmp" in
+		1|0|2) :;;
+		*) die "$_cmp" 'version comparison failed';;
+	esac
+
+	# The easy part
 	case "$2" in
 		'lesser_than'|'-lt'|'<')
 			[ "$_cmp" = '2' ] && return 0
@@ -420,6 +428,11 @@ version_compare() {
 _largest_version() (
 	# Value used to separate version components
 	VERSION_SEPARATOR="${VERSION_SEPARATOR:-.}"
+
+	for _p in "$1" "$2"; do
+		[ "$(printf %.1s "$_p")" = "$VERSION_SEPARATOR" ] &&
+			die 7 'invalid version pattern provided'
+	done
 
 	# Split versions on VER_SEP into int/sub
 	_v="$1$2"
