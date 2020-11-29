@@ -58,6 +58,11 @@ Basic Skeleton
         # Check host
         is_release '20.04' '20.10' ||
                 die 'Only *buntu 20.04 and 20.10 are supported.'
+
+        # Check for expected binaries
+	for cmd in 'strace' 'cicd_runner' 'grep'; do
+	    command_present "$cmd" || die "$cmd was not found"
+	done
     }
 
 

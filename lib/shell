@@ -60,6 +60,25 @@ helper_version() {
 
 
 ##
+# Check if a command exists in ``$PATH``.
+#
+# **Usage:** command_present bin
+#
+# - bin: name of command
+#
+# .. code-block:: sh
+#
+#    for cmd in 'grep' 'xterm'; do
+#        command_present "$cmd" || die "$cmd not found"
+#    done
+##
+command_present() {
+	command -v "$1" >/dev/null && return 0
+	return 1
+}
+
+
+##
 # Print a formatted (critical) message and exit with status.
 #
 # **Usage:** die [exit_status] message
