@@ -208,7 +208,7 @@ detect_all() {
 #    detect_kernel || die 'Kernel is not supported'
 ##
 detect_kernel() {
-	if command -v uname >/dev/null; then
+	if command_present 'uname'; then
 		_kern_uname
 		[ -n "$H_KERNEL" ] && return 0
 	fi
@@ -243,7 +243,7 @@ detect_distro() {
 		_kern="$(detect_kernel; printf '%s' "$H_KERNEL")"
 	fi
 
-	if command -v lsb_release >/dev/null; then
+	if command_present 'lsb_release'; then
 		_distro_lsb
 		[ -n "$H_DISTRO" ] && return 0
 	fi;if [ "$_kern" = 'FreeBSD' ]; then
@@ -281,10 +281,10 @@ _distro_freebsd() {
 #    detect_release || die 'Release is not supported'
 ##
 detect_release() {
-	if command -v lsb_release >/dev/null; then
+	if command_present 'lsb_release'; then
 		_release_lsb
 		[ -n "$H_RELEASE" ] && return 0
-	fi;if command -v freebsd-version >/dev/null; then
+	fi;if command_present 'freebsd-version'; then
 		_release_freebsd
 		[ -n "$H_RELEASE" ] && return 0
 	fi
