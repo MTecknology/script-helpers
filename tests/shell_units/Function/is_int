@@ -1,0 +1,25 @@
+#!/bin/sh
+##
+# Run tests for is_int().
+##
+#set -x
+
+. "$TESTDIR/../lib/shell"
+
+
+# Simple 'true' searches
+is_int '1' || return 1
+is_int '01' || return 1
+is_int '10' || return 1
+is_int '198721387427' || return 1
+
+# Simple 'false' searches
+is_int 'a' && return 1
+is_int '1a' && return 1
+is_int 'a1' && return 1
+is_int '12346791x23456' && return 1
+is_int '12346791_23456' && return 1
+
+
+# Complete
+return 0

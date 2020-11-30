@@ -306,6 +306,26 @@ _release_freebsd() {
 
 
 ##
+# Check if a value is present in a string.
+#
+# **Usage:** in_string needle haystack
+#
+# - needle: value to search for
+# - haystack: string to be searched
+#
+# **Returns:** true if needle was found
+#
+# .. code-block:: sh
+#
+#    in_string 'fuz' 'abcfuz123' && echo 'found some fuz'
+##
+in_string() {
+	expr "_$2" : "_.*$1" >/dev/null && return 0
+	return 1
+}
+
+
+##
 # Evaluate if running kernel matches provided argument(s).
 #
 # **Usage:** is_kernel match [match..]
@@ -394,6 +414,27 @@ is_release() {
 
 
 ##
+# Evaluate if a given string is a int.
+#
+# **Usage:** is_int str
+#
+# - str: any string to test against
+#
+# **Returns:** true if str is an integer
+#
+# .. code-block:: sh
+#
+#    is_int "$foo" || die 'Argument must be an integer.'
+##
+is_int() {
+	case "$1" in
+		(*[!0123456789]*) return 1;;
+		(*) return 0;;
+	esac
+}
+
+
+##
 # Evaluate if a given string is true-like.
 #
 # **Usage:** is_true str
@@ -460,7 +501,7 @@ is_false() {
 #        die 'Unexpected (pre-release) version found'
 ##
 version_compare() {
-	_largest_version "$1" "$3"; _cmp="$(printf '%s' "$?")"
+	_largest_version "$1" "$3"; _cmp="$?"
 
 	# Check for valid responses or bail early
 	case "$_cmp" in
@@ -544,14 +585,10 @@ _largest_version() (
 	fi
 
 	# Check for invalid
-	case "$_m1$_m2" in
-		(*[!0123456789]*)
-			die 7 'version_compare called with unsupported version type'
-			;;
-	esac
+	is_int "$_m1$_m2" || die 7 'invalid version pattern provided'
 
 	# If a ver_sep is present
-	if [ "${_v#*"$VERSION_SEPARATOR"}" != "$_v" ]; then
+	if in_string "$VERSION_SEPARATOR" "$_v"; then
 		# Check for a larger "major" version number
 		[ "$_m1" -lt "$_m2" ] && return 2
 		[ "$_m1" -gt "$_m2" ] && return 1
