@@ -185,12 +185,12 @@ log() {
 #    detect all || die 'Detections failed'
 ##
 detect_all() {
-	grep '^detect_.+\(\)\s\{' "$0" |
-	  while read -r _line; do
-		eval "${_line%%(*}" || return 1
-	done
+	_e='0'
+	detect_kernel || _e='1'
+	detect_distro || _e='1'
+	detect_release || _e='1'
 
-	return 0
+	return "$_e"
 }
 
 
