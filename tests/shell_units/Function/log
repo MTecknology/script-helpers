@@ -4,23 +4,23 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 
 # Verify format for log levels
-[ "$(LOG_LEVEL=0 log 0 'foo')" = '*** DEBUG: foo ***' ] || return 1
-[ "$(LOG_LEVEL=0 log 1 'foo')" = '*** INFO: foo ***' ] || return 1
-[ "$(LOG_LEVEL=0 log 2 'foo')" = '*** WARN: foo ***' ] || return 1
-[ "$(LOG_LEVEL=0 log 3 'foo')" = '*** ERROR: foo ***' ] || return 1
-[ "$(LOG_LEVEL=0 log 4 'foo')" = '*** UNKNOWN: foo ***' ] || return 1
+[ "$(LOG_LEVEL=0 log 0 'foo')" = '*** DEBUG: foo ***' ] || exit 1
+[ "$(LOG_LEVEL=0 log 1 'foo')" = '*** INFO: foo ***' ] || exit 1
+[ "$(LOG_LEVEL=0 log 2 'foo')" = '*** WARN: foo ***' ] || exit 1
+[ "$(LOG_LEVEL=0 log 3 'foo')" = '*** ERROR: foo ***' ] || exit 1
+[ "$(LOG_LEVEL=0 log 4 'foo')" = '*** UNKNOWN: foo ***' ] || exit 1
 
 # Verify default log output
-[ "$(log 0 'foo')" = '' ] || return 1
-[ "$(log 1 'foo')" = '' ] || return 1
-[ "$(log 2 'foo')" = '*** WARN: foo ***' ] || return 1
-[ "$(log 3 'foo')" = '*** ERROR: foo ***' ] || return 1
-[ "$(log 4 'foo')" = '*** UNKNOWN: foo ***' ] || return 1
+[ "$(log 0 'foo')" = '' ] || exit 1
+[ "$(log 1 'foo')" = '' ] || exit 1
+[ "$(log 2 'foo')" = '*** WARN: foo ***' ] || exit 1
+[ "$(log 3 'foo')" = '*** ERROR: foo ***' ] || exit 1
+[ "$(log 4 'foo')" = '*** UNKNOWN: foo ***' ] || exit 1
 
 
 # Complete
-return 0
+exit 0

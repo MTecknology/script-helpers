@@ -4,23 +4,23 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 
 # Check that 'die' without exit status exits w/ status=1
-( die 'dead' ) >/dev/null; [ "$?" = '1' ] || return 1
+( die 'dead' ) >/dev/null; [ "$?" = '1' ] || exit 1
 
 # When an exit status was set
-( die 7 'dead' ) >/dev/null; [ "$?" = '7' ] || return 1
-( die 8 'dead' ) >/dev/null; [ "$?" = '0' ] && return 1
+( die 7 'dead' ) >/dev/null; [ "$?" = '7' ] || exit 1
+( die 8 'dead' ) >/dev/null; [ "$?" = '0' ] && exit 1
 
 # Permit a zero status on early exit
-( die 0 'dead' ) >/dev/null; [ "$?" = '0' ] || return 1
+( die 0 'dead' ) >/dev/null; [ "$?" = '0' ] || exit 1
 
 # Verify the right message was sent to stdout
-[ "$(die 'dead')" = '*** CRITICAL: dead ***' ] || return 1
-[ "$(die 'dead')" = '*** CRITICAL: beef ***' ] && return 1
+[ "$(die 'dead')" = '*** CRITICAL: dead ***' ] || exit 1
+[ "$(die 'dead')" = '*** CRITICAL: beef ***' ] && exit 1
 
 
 # Complete
-return 0
+exit 0

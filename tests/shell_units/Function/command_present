@@ -4,20 +4,20 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 
 # Binaries that should almost definitely exist on any *nix-like system
-( command_present 'sh' ); [ "$?" = 0 ] || return 1
-( command_present 'ls' ); [ "$?" = 0 ] || return 1
-( command_present 'mv' ); [ "$?" = 0 ] || return 1
+( command_present 'sh' ); [ "$?" = 0 ] || exit 1
+( command_present 'ls' ); [ "$?" = 0 ] || exit 1
+( command_present 'mv' ); [ "$?" = 0 ] || exit 1
 
 
 # Binaries that should almost definitely NOT exist
-( command_present 'BRQ9f8U3fi' ); [ "$?" = 1 ] || return 1
-( command_present 'vdVqouX5NW' ); [ "$?" = 1 ] || return 1
-( command_present 'PoaXHh8Rug' ); [ "$?" = 1 ] || return 1
+( command_present 'BRQ9f8U3fi' ); [ "$?" = 1 ] || exit 1
+( command_present 'vdVqouX5NW' ); [ "$?" = 1 ] || exit 1
+( command_present 'PoaXHh8Rug' ); [ "$?" = 1 ] || exit 1
 
 
 # Complete
-return 0
+exit 0

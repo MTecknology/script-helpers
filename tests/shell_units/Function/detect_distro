@@ -4,12 +4,12 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 
 # Check that some distro is detected
-( detect_distro; test -n "$H_DISTRO" ); [ "$?" = 0 ] && return 0
+( detect_distro; test -n "$H_DISTRO" ); [ "$?" = 0 ] && exit 0
 
 
 # Complete
-return 0
+exit 0

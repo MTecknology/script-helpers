@@ -449,8 +449,10 @@ is_int() {
 ##
 is_true() {
         _str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
-        [ "$_str" -eq '0' ] 2>/dev/null && return 0
         [ "$_str" = 'true' ] && return 0
+        [ "$_str" = '' ] && return 1
+	is_int "$_str" || return 1
+        [ "$_str" -eq '0' ] 2>/dev/null && return 0
 
         return 1
 }

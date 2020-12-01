@@ -4,14 +4,14 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 # Check expected variables have expected values
-[ "$SCRIPT_HELPER_VERSION" = 'dev' ] || return 1
+[ "$SCRIPT_HELPER_VERSION" = 'dev' ] || exit 1
 
 # Verify values cannot be changed
-( SCRIPT_HELPER_VERSION=77 2>/dev/null ) && return 1
+( SCRIPT_HELPER_VERSION=77 ) 2>/dev/null && exit 1
 
 
 # Complete
-return 0
+exit 0

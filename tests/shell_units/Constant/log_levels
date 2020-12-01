@@ -4,28 +4,28 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 # Check expected variables have expected values
-[ "$DEBUG" = 0 ] || return 1
-[ "$D" = 0 ] || return 1
-[ "$INFO" = 1 ] || return 1
-[ "$I" = 1 ] || return 1
-[ "$WARN" = 2 ] || return 1
-[ "$W" = 2 ] || return 1
-[ "$ERROR" = 3 ] || return 1
-[ "$E" = 3 ] || return 1
+[ "$DEBUG" = 0 ] || exit 1
+[ "$D" = 0 ] || exit 1
+[ "$INFO" = 1 ] || exit 1
+[ "$I" = 1 ] || exit 1
+[ "$WARN" = 2 ] || exit 1
+[ "$W" = 2 ] || exit 1
+[ "$ERROR" = 3 ] || exit 1
+[ "$E" = 3 ] || exit 1
 
 # Verify values cannot be changed
-( DEBUG=77 2>/dev/null ) && return 1
-( D=77 2>/dev/null ) && return 1
-( INFO=77 2>/dev/null ) && return 1
-( I=77 2>/dev/null ) && return 1
-( WARN=77 2>/dev/null ) && return 1
-( W=77 2>/dev/null ) && return 1
-( ERROR=77 2>/dev/null ) && return 1
-( E=77 2>/dev/null ) && return 1
+( DEBUG=77 ) 2>/dev/null && exit 1
+( D=77 ) 2>/dev/null && exit 1
+( INFO=77 ) 2>/dev/null && exit 1
+( I=77 ) 2>/dev/null && exit 1
+( WARN=77 ) 2>/dev/null && exit 1
+( W=77 ) 2>/dev/null && exit 1
+( ERROR=77 ) 2>/dev/null && exit 1
+( E=77 ) 2>/dev/null && exit 1
 
 
 # Complete
-return 0
+exit 0

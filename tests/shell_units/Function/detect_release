@@ -4,12 +4,12 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 
 # Check that some release is detected
-( detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] && return 0
+( detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] && exit 0
 
 
 # Complete
-return 0
+exit 0

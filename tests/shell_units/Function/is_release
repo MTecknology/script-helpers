@@ -4,21 +4,21 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 
 # Static-defined H_RELEASE (true)
 (
 	export H_RELEASE='20.04';
 	is_release '18.04' '20.04'
-); [ "$?" = '0' ] || return 1
+); [ "$?" = '0' ] || exit 1
 
 # Static-defined H_RELEASE (false)
 (
 	export H_RELEASE='12.04';
 	is_release '18.04' '20.04'
-); [ "$?" = '1' ] || return 1
+); [ "$?" = '1' ] || exit 1
 
 
 # Complete
-return 0
+exit 0

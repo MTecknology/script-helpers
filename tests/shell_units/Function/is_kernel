@@ -4,21 +4,21 @@
 ##
 #set -x
 
-. "$TESTDIR/../lib/shell"
+. "$TEST_DIR/../lib/shell"
 
 
 # Static-defined H_KERNEL (true)
 (
 	export H_KERNEL='Linux';
 	is_kernel 'Linux' 'AIX'
-); [ "$?" = '0' ] || return 1
+); [ "$?" = '0' ] || exit 1
 
 # Static-defined H_KERNEL (false)
 (
 	export H_KERNEL='FreeBSD';
 	is_kernel 'Linux' 'AIX'
-); [ "$?" = '1' ] || return 1
+); [ "$?" = '1' ] || exit 1
 
 
 # Complete
-return 0
+exit 0

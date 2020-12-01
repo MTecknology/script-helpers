@@ -1,10 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 ##
 # Find and run test units on shell scripts
 ##
 
 # Repository root
-TESTDIR="$(dirname "$0")"; export TESTDIR
+TEST_DIR="$(dirname "$0")"; export TEST_DIR
+
+# Test shell
+TEST_SHELL="${TEST_SHELL:-sh}"
+printf 'Using shell: %s\n' "$TEST_SHELL"
 
 
 main() {
@@ -26,14 +30,14 @@ main() {
 run_tests() {
 	printf 'Running %s Tests...\n' "$1"
 
-	for path in "$TESTDIR/shell_units/$1/"*; do
+	for path in "$TEST_DIR/shell_units/$1/"*; do
 		file="$(basename "$path")"
 		# Skip files starting with an underscore
 		[ "$file" = "${file#_}" ] || continue
 
 		# Run test unit
 		printf '%24s:\t' "$file"
-		if ! (sh "$path"); then
+		if ! ("$TEST_SHELL" "$path"); then
 			printf 'FAILED\n'
 			TESTS_FAILED='true'
 		else
