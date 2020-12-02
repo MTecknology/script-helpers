@@ -115,7 +115,8 @@ _distro_lsb() {
 # Detect release from /etc/*release* file
 _distro_release() {
 	if command_present 'awk'; then
-		H_DISTRO="$(to_lower "$(awk -F= '/^ID\=/{print $2}' /etc/os-release)")"
+		H_DISTRO="$(to_lower "$(awk -F '=' '/^ID=/{print $2}' /etc/os-release)")"
+		H_DISTRO="$(printf '%s' "$H_DISTRO" | sed 's/"//g')"
 		if [ -n "$H_DISTRO" ]; then
 			export H_DISTRO
 			return 0
@@ -133,6 +134,29 @@ _distro_swvers() {
 _distro_freebsd() {
 	H_DISTRO='freebsd'
 	export H_DISTRO
+}
+
+
+##
+# Detect distribution of running system.
+#
+# **Usage:** detect_distro
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports:** H_DISTRO
+#
+# .. code-block:: sh
+#
+#    detect_distro || die 'Distro is not supported'
+##
+detect_init() {
+	if [ -e '/sbin/init' ]; then
+		H_INIT="$(to_lower "$(/sbin/init --version | awk '{print $1}')")"
+		export H_INIT
+		return 0
+	fi
+	return 1
 }
 
 
@@ -205,7 +229,8 @@ _release_lsb() {
 # Detect release from os-release
 _release_release() {
 	if command_present 'awk'; then
-		H_RELEASE="$(to_lower "$(awk -F= '/^VERSION_ID\=/{print $2}' /etc/os-release)")"
+		H_RELEASE="$(to_lower "$(awk -F '=' '/^VERSION_ID=/{print $2}' /etc/os-release)")"
+		H_RELEASE="$(printf '%s' "$H_RELEASE" | sed 's/"//g')"
 		if [ -n "$H_RELEASE" ]; then
 			export H_RELEASE
 			return 0
@@ -368,6 +393,35 @@ is_distro() {
 is_false() {
         is_true "$1" && return 1
         return 0
+}
+
+
+##
+# Evaluate if running distribution matches provided argument(s).
+#
+# **Usage:** is_distro match [match..]
+#
+# - match: any string to test against (Debian, Ubuntu, RHEL, etc.)
+#
+# **Returns:** true if running distro matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_distro 'Debian' || die 'Only Debian is supported'
+##
+is_init() {
+	if [ -n "$H_INIT" ]; then
+		_needle="$H_INIT"
+	else
+		_needle="$(detect_init; printf '%s' "$H_INIT")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect init.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+        return 1
 }
 
 
@@ -561,6 +615,7 @@ log() {
 #    low="$(to_lower "$up")"
 ##
 starts_with() {
+	[ "$1" = "$2" ] && return 0
 	case "$2" in
 		("$1"*) return 0;;
 		(*) return 1;;

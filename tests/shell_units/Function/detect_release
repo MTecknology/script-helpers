@@ -8,14 +8,14 @@
 
 
 # Check that some release is detected
-( detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] && exit 0
+( detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] || exit 1
 
 # Check release (if defined)
 if [ -n "$EXPECT_RELEASE" ]; then
         detect_release
         starts_with "$EXPECT_RELEASE" "$H_RELEASE" || exit 1
 else
-        log "$WARN" 'EXPECTED_RELEASE unset ; not running tests'
+        log "$WARN" 'EXPECT_RELEASE unset ; not running tests'
 fi
 
 

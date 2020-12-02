@@ -1,0 +1,24 @@
+#!/bin/sh
+##
+# Run tests for is_init().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Static-defined H_INIT (true)
+(
+	export H_INIT='sysv';
+	is_init 'sysv' 'systderp'
+); [ "$?" = '0' ] || exit 1
+
+# Static-defined H_INIT (false)
+(
+	export H_INIT='upstart';
+	is_init 'sysv' 'systderp'
+); [ "$?" = '1' ] || exit 1
+
+
+# Complete
+exit 0

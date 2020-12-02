@@ -1,0 +1,23 @@
+#!/bin/sh
+##
+# Run tests for detect_init().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Check that some init is detected
+( detect_init; test -n "$H_INIT" ); [ "$?" = 0 ] || exit 1
+
+# Check init (if defined)
+if [ -n "$EXPECT_INIT" ]; then
+        detect_init || exit 1
+        [ "$H_INIT" = "$EXPECT_INIT" ] || exit 1
+else
+        log "$WARN" 'EXPECT_INIT unset ; not running tests'
+fi
+
+
+# Complete
+exit 0

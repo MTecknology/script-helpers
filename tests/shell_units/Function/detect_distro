@@ -8,14 +8,14 @@
 
 
 # Check that some distro is detected
-( detect_distro; test -n "$H_DISTRO" ); [ "$?" = 0 ] && exit 0
+( detect_distro; test -n "$H_DISTRO" ); [ "$?" = 0 ] || exit 1
 
 # Check distro (if defined)
 if [ -n "$EXPECT_DISTRO" ]; then
 	detect_distro
 	[ "$H_DISTRO" = "$EXPECT_DISTRO" ] || exit 1
 else
-	log "$WARN" 'EXPECTED_DISTRO unset ; not running tests'
+	log "$WARN" 'EXPECT_DISTRO unset ; not running tests'
 fi
 
 
