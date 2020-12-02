@@ -30,6 +30,250 @@ export DEBUG D INFO I WARN W ERROR E
 
 
 ##
+# Check if a command exists in ``$PATH``.
+#
+# **Usage:** command_present bin
+#
+# - bin: name of command
+#
+# .. code-block:: sh
+#
+#    for cmd in 'grep' 'xterm'; do
+#        command_present "$cmd" || die "$cmd not found"
+#    done
+##
+command_present() {
+	command -v "$1" >/dev/null && return 0
+	return 1
+}
+
+
+##
+# Run all detection routines.
+#
+# **Usage:** detect_all
+#
+# **Returns:** true if all detections succeed
+#
+# .. code-block:: sh
+#
+#    detect all || die 'Detections failed'
+##
+detect_all() {
+	_e='0'
+	detect_distro || _e='1'
+	detect_kernel || _e='1'
+	detect_release || _e='1'
+
+	return "$_e"
+}
+
+
+##
+# Detect distribution of running system.
+#
+# **Usage:** detect_distro
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports:** H_DISTRO
+#
+# .. code-block:: sh
+#
+#    detect_distro || die 'Distro is not supported'
+##
+detect_distro() {
+	if [ -n "$H_KERNEL" ]; then
+		_kern="$H_KERNEL"
+	else
+		_kern="$(to_lower "$(detect_kernel; printf '%s' "$H_KERNEL")")"
+	fi
+
+	if command_present 'lsb_release'; then
+		_distro_lsb
+		[ -n "$H_DISTRO" ] && return 0
+	fi;if [ -f '/etc/os-release' ]; then
+		_distro_release
+		[ -n "$H_DISTRO" ] && return 0
+	fi;if command_present 'sw_vers'; then
+		_distro_swvers
+		[ -n "$H_DISTRO" ] && return 0
+	fi;if [ "$_kern" = 'freebsd' ]; then
+		_distro_freebsd
+		[ -n "$H_DISTRO" ] && return 0
+	fi
+
+	return 1
+}
+
+# Detect release of Linux systems
+_distro_lsb() {
+	H_DISTRO="$(to_lower "$(lsb_release --short --id)")"
+	export H_DISTRO
+}
+
+# Detect release from /etc/*release* file
+_distro_release() {
+	if command_present 'awk'; then
+		H_DISTRO="$(to_lower "$(awk -F= '/^ID\=/{print $2}' /etc/os-release)")"
+		if [ -n "$H_DISTRO" ]; then
+			export H_DISTRO
+			return 0
+		fi
+	fi
+}
+
+# Detect release of Mac systems
+_distro_swvers() {
+	H_DISTRO='macos'
+	export H_DISTRO
+}
+
+# Detect release of FreeBSD systems
+_distro_freebsd() {
+	H_DISTRO='freebsd'
+	export H_DISTRO
+}
+
+
+##
+# Detect kernel of running system.
+#
+# **Usage:** detect_kernel
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports:** H_KERNEL
+#
+# .. code-block:: sh
+#
+#    detect_kernel || die 'Kernel is not supported'
+##
+detect_kernel() {
+	if command_present 'uname'; then
+		_kern_uname
+		[ -n "$H_KERNEL" ] && return 0
+	fi
+
+	return 1
+}
+
+# Use uname output to detect kernel.
+_kern_uname() {
+	H_KERNEL="$(to_lower "$(uname -s)")"
+	export H_KERNEL
+}
+
+
+##
+# Detect distro release of running system.
+#
+# **Usage:** detect_release
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports:** H_RELEASE
+#
+# .. code-block:: sh
+#
+#    detect_release || die 'Release is not supported'
+##
+detect_release() {
+	if command_present 'lsb_release'; then
+		_release_lsb
+		[ -n "$H_RELEASE" ] && return 0
+	fi;if [ -f '/etc/os-release' ]; then
+		_release_release
+		[ -n "$H_RELEASE" ] && return 0
+	fi;if command_present 'sw_vers'; then
+		_release_swvers
+		[ -n "$H_DISTRO" ] && return 0
+	fi;if command_present 'freebsd-version'; then
+		_release_freebsd
+		[ -n "$H_RELEASE" ] && return 0
+	fi
+
+	return 1
+}
+
+# Detect release version using lsb_release
+_release_lsb() {
+	H_RELEASE="$(lsb_release --short --release)"
+	export H_RELEASE
+}
+
+# Detect release from os-release
+_release_release() {
+	if command_present 'awk'; then
+		H_RELEASE="$(to_lower "$(awk -F= '/^VERSION_ID\=/{print $2}' /etc/os-release)")"
+		if [ -n "$H_RELEASE" ]; then
+			export H_RELEASE
+			return 0
+		fi
+	fi
+}
+
+# Detect release of Mac systems
+_release_swvers() {
+	H_RELEASE="$(sw_vers -productVersion)"
+	export H_RELEASE
+}
+
+# Detect release of FreeBSD system
+_release_freebsd() {
+	H_RELEASE="$(freebsd-version -k)"
+	export H_RELEASE
+}
+
+
+##
+# Print a formatted (critical) message and exit with status.
+#
+# **Usage:** die [exit_status] message
+#
+# - exit_status: exit code to use with script termination (default: 1)
+# - message: message to print before terminating script execution
+#
+# .. code-block:: sh
+#
+#    [ -n "$foo" ] || die 255 '$foo not defined'
+##
+die() {
+        # If first argument was an integer, use as exit_status
+	case "$1" in
+		(*[!0123456789]*) _exit_status=1;;
+		(*) _exit_status="$1"; shift;;
+	esac
+
+        printf '*** CRITICAL: %s ***\n' "$1"
+        exit "$_exit_status"
+}
+
+
+##
+# Check if string ends with another string
+#
+# **Usage:** ends_with key str
+#
+# - key: string to search for
+# - str: ascii string to search
+#
+# **Returns:** true if str ends with key
+#
+# .. code-block:: sh
+#
+#    ends_with 'init' "$input" || die 'invalid input'
+#    low="$(to_lower "$up")"
+##
+ends_with() {
+	case "$2" in
+		(*"$1") return 0;;
+		(*) return 1;;
+	esac
+}
+
+
+##
 # Return true if script version is between min/max ('dev' == git_HEAD).
 #
 # **Usage:** helper_version min [max]
@@ -60,47 +304,175 @@ helper_version() {
 
 
 ##
-# Check if a command exists in ``$PATH``.
+# Check if a value is present in a string.
 #
-# **Usage:** command_present bin
+# **Usage:** in_string needle haystack
 #
-# - bin: name of command
+# - needle: value to search for
+# - haystack: string to be searched
+#
+# **Returns:** true if needle was found
 #
 # .. code-block:: sh
 #
-#    for cmd in 'grep' 'xterm'; do
-#        command_present "$cmd" || die "$cmd not found"
-#    done
+#    in_string 'fuz' 'abcfuz123' && echo 'found some fuz'
 ##
-command_present() {
-	command -v "$1" >/dev/null && return 0
+in_string() {
+	expr "_$2" : "_.*$1" >/dev/null && return 0
 	return 1
 }
 
 
 ##
-# Print a formatted (critical) message and exit with status.
+# Evaluate if running distribution matches provided argument(s).
 #
-# **Usage:** die [exit_status] message
+# **Usage:** is_distro match [match..]
 #
-# - exit_status: exit code to use with script termination (default: 1)
-# - message: message to print before terminating script execution
+# - match: any string to test against (Debian, Ubuntu, RHEL, etc.)
+#
+# **Returns:** true if running distro matches a provided 'match'
 #
 # .. code-block:: sh
 #
-#    [ -n "$foo" ] || die 255 '$foo not defined'
+#    is_distro 'Debian' || die 'Only Debian is supported'
 ##
-die() {
-        # If first argument was an integer, use as exit_status
-	case "$1" in
-		*[!0123456789]*) _exit_status=1;;
-		*) _exit_status="$1"; shift;;
-	esac
+is_distro() {
+	if [ -n "$H_DISTRO" ]; then
+		_needle="$H_DISTRO"
+	else
+		_needle="$(detect_distro; printf '%s' "$H_DISTRO")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect distro.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
 
-        printf '*** CRITICAL: %s ***\n' "$1"
-        exit "$_exit_status"
+        return 1
 }
 
+
+##
+# Evaluate if a given string is true-like.
+#
+# **Usage:** is_false str
+#
+# - str: any string to test against
+#
+# **Returns:** true if ($str != 0) or (lower($str) != true)
+#
+# .. code-block:: sh
+#
+#    is_false 'lies' || die 'I am too gullible'
+##
+is_false() {
+        is_true "$1" && return 1
+        return 0
+}
+
+
+##
+# Evaluate if a given string is a int.
+#
+# **Usage:** is_int str
+#
+# - str: any string to test against
+#
+# **Returns:** true if str is an integer
+#
+# .. code-block:: sh
+#
+#    is_int "$foo" || die 'Argument must be an integer.'
+##
+is_int() {
+	case "$1" in
+		(*[!0123456789]*) return 1;;
+		(*) return 0;;
+	esac
+}
+
+
+##
+# Evaluate if running kernel matches provided argument(s).
+#
+# **Usage:** is_kernel match [match..]
+#
+# - match: any string to test against (Linux, BSD, etc.)
+#
+# **Returns:** true if running kernel matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_kernel 'Linux' 'BSD' || die 'Only Linux/BSD are supported'
+##
+is_kernel() {
+	if [ -n "$H_KERNEL" ]; then
+		_needle="$H_KERNEL"
+	else
+		_needle="$(detect_kernel; printf '%s' "$H_KERNEL")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect kernel.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+        return 1
+}
+
+
+##
+# Evaluate if running distro release matches provided argument.
+#
+# **Usage:** is_release match [match..]
+#
+# - match: any string to test against (12.04, 10.1, etc.)
+#
+# **Returns:** true if running release matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_release '14.04' '16.04' '18.04' '20.04' ||
+#            die 'Only non-EOL LTS releases are supported'
+##
+is_release() {
+	if [ -n "$H_RELEASE" ]; then
+		_needle="$H_RELEASE"
+	else
+		_needle="$(detect_release; printf '%s' "$H_RELEASE")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect release.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+        return 1
+}
+
+
+##
+# Evaluate if a given string is true-like.
+#
+# **Usage:** is_true str
+#
+# - str: any string to test against
+#
+# **Returns:** true if ($str is 0) or (lower($str) == true)
+#
+# .. code-block:: sh
+#
+#    is_true "$foo" || die "\$foo said it isn't so..."
+##
+is_true() {
+        _str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+        [ "$_str" = 'true' ] && return 0
+        [ "$_str" = '' ] && return 1
+	is_int "$_str" || return 1
+        [ "$_str" -eq '0' ] 2>/dev/null && return 0
+
+        return 1
+}
 
 ##
 # Manage a lock file.
@@ -174,308 +546,24 @@ log() {
 
 
 ##
-# Run all detection routines.
+# Check if string starts with another string
 #
-# **Usage:** detect_all
+# **Usage:** starts_with key str
 #
-# **Returns:** true if all detections succeed
+# - key: string to search for
+# - str: ascii string to search
 #
-# .. code-block:: sh
-#
-#    detect all || die 'Detections failed'
-##
-detect_all() {
-	_e='0'
-	detect_kernel || _e='1'
-	detect_distro || _e='1'
-	detect_release || _e='1'
-
-	return "$_e"
-}
-
-
-##
-# Detect kernel of running system.
-#
-# **Usage:** detect_kernel
-#
-# **Returns:** true if detection succeeds
-#
-# **Exports:** H_KERNEL
+# **Returns:** true if str starts with key
 #
 # .. code-block:: sh
 #
-#    detect_kernel || die 'Kernel is not supported'
+#    starts_with 'init' "$input" || die 'invalid input'
+#    low="$(to_lower "$up")"
 ##
-detect_kernel() {
-	if command_present 'uname'; then
-		_kern_uname
-		[ -n "$H_KERNEL" ] && return 0
-	fi
-
-	return 1
-}
-
-# Use uname output to detect kernel.
-_kern_uname() {
-	H_KERNEL="$(to_lower "$(uname -s)")"
-	export H_KERNEL
-}
-
-
-##
-# Detect distribution of running system.
-#
-# **Usage:** detect_distro
-#
-# **Returns:** true if detection succeeds
-#
-# **Exports:** H_DISTRO
-#
-# .. code-block:: sh
-#
-#    detect_distro || die 'Distro is not supported'
-##
-detect_distro() {
-	if [ -n "$H_KERNEL" ]; then
-		_kern="$H_KERNEL"
-	else
-		_kern="$(to_lower "$(detect_kernel; printf '%s' "$H_KERNEL")")"
-	fi
-
-	if command_present 'lsb_release'; then
-		_distro_lsb
-		[ -n "$H_DISTRO" ] && return 0
-	fi;if [ -f '/etc/os-release' ]; then
-		_distro_release
-		[ -n "$H_DISTRO" ] && return 0
-	fi;if command_present 'sw_vers'; then
-		_distro_swvers
-		[ -n "$H_DISTRO" ] && return 0
-	fi;if [ "$_kern" = 'freebsd' ]; then
-		_distro_freebsd
-		[ -n "$H_DISTRO" ] && return 0
-	fi
-
-	return 1
-}
-
-# Detect release of Linux systems
-_distro_lsb() {
-	H_DISTRO="$(to_lower "$(lsb_release --short --id)")"
-	export H_DISTRO
-}
-
-# Detect release from /etc/*release* file
-_distro_release() {
-	if command_present 'awk'; then
-		H_DISTRO="$(to_lower "$(awk -F= '/^ID\=/{print $2}' /etc/os-release)")"
-		if [ -n "$H_DISTRO" ]; then
-			export H_DISTRO
-			return 0
-		fi
-	fi
-}
-
-# Detect release of Mac systems
-_distro_swvers() {
-	H_DISTRO='macos'
-	export H_DISTRO
-}
-
-# Detect release of FreeBSD systems
-_distro_freebsd() {
-	H_DISTRO='freebsd'
-	export H_DISTRO
-}
-
-
-##
-# Detect distro release of running system.
-#
-# **Usage:** detect_release
-#
-# **Returns:** true if detection succeeds
-#
-# **Exports:** H_RELEASE
-#
-# .. code-block:: sh
-#
-#    detect_release || die 'Release is not supported'
-##
-detect_release() {
-	if command_present 'lsb_release'; then
-		_release_lsb
-		[ -n "$H_RELEASE" ] && return 0
-	fi;if [ -f '/etc/os-release' ]; then
-		_release_release
-		[ -n "$H_RELEASE" ] && return 0
-	fi;if command_present 'sw_vers'; then
-		_release_swvers
-		[ -n "$H_DISTRO" ] && return 0
-	fi;if command_present 'freebsd-version'; then
-		_release_freebsd
-		[ -n "$H_RELEASE" ] && return 0
-	fi
-
-	return 1
-}
-
-# Detect release version using lsb_release
-_release_lsb() {
-	H_RELEASE="$(lsb_release --short --release)"
-	export H_RELEASE
-}
-
-# Detect release from os-release
-_release_release() {
-	if command_present 'awk'; then
-		H_RELEASE="$(to_lower "$(awk -F= '/^VERSION_ID\=/{print $2}' /etc/os-release)")"
-		if [ -n "$H_RELEASE" ]; then
-			export H_RELEASE
-			return 0
-		fi
-	fi
-}
-
-# Detect release of Mac systems
-_release_swvers() {
-	H_RELEASE="$(sw_vers -productVersion)"
-	export H_RELEASE
-}
-
-# Detect release of FreeBSD system
-_release_freebsd() {
-	H_RELEASE="$(freebsd-version -k)"
-	export H_RELEASE
-}
-
-
-##
-# Check if a value is present in a string.
-#
-# **Usage:** in_string needle haystack
-#
-# - needle: value to search for
-# - haystack: string to be searched
-#
-# **Returns:** true if needle was found
-#
-# .. code-block:: sh
-#
-#    in_string 'fuz' 'abcfuz123' && echo 'found some fuz'
-##
-in_string() {
-	expr "_$2" : "_.*$1" >/dev/null && return 0
-	return 1
-}
-
-
-##
-# Evaluate if running kernel matches provided argument(s).
-#
-# **Usage:** is_kernel match [match..]
-#
-# - match: any string to test against (Linux, BSD, etc.)
-#
-# **Returns:** true if running kernel matches a provided 'match'
-#
-# .. code-block:: sh
-#
-#    is_kernel 'Linux' 'BSD' || die 'Only Linux/BSD are supported'
-##
-is_kernel() {
-	if [ -n "$H_KERNEL" ]; then
-		_needle="$H_KERNEL"
-	else
-		_needle="$(detect_kernel; printf '%s' "$H_KERNEL")"
-	fi
-	[ -n "$_needle" ] || die 7 'Could not detect kernel.'
-	
-	for _hay in "$@"; do
-		[ "$_needle" = "$_hay" ] && return 0
-	done
-
-        return 1
-}
-
-
-##
-# Evaluate if running distribution matches provided argument(s).
-#
-# **Usage:** is_distro match [match..]
-#
-# - match: any string to test against (Debian, Ubuntu, RHEL, etc.)
-#
-# **Returns:** true if running distro matches a provided 'match'
-#
-# .. code-block:: sh
-#
-#    is_distro 'Debian' || die 'Only Debian is supported'
-##
-is_distro() {
-	if [ -n "$H_DISTRO" ]; then
-		_needle="$H_DISTRO"
-	else
-		_needle="$(detect_distro; printf '%s' "$H_DISTRO")"
-	fi
-	[ -n "$_needle" ] || die 7 'Could not detect distro.'
-	
-	for _hay in "$@"; do
-		[ "$_needle" = "$_hay" ] && return 0
-	done
-
-        return 1
-}
-
-
-##
-# Evaluate if running distro release matches provided argument.
-#
-# **Usage:** is_release match [match..]
-#
-# - match: any string to test against (12.04, 10.1, etc.)
-#
-# **Returns:** true if running release matches a provided 'match'
-#
-# .. code-block:: sh
-#
-#    is_release '14.04' '16.04' '18.04' '20.04' ||
-#            die 'Only non-EOL LTS releases are supported'
-##
-is_release() {
-	if [ -n "$H_RELEASE" ]; then
-		_needle="$H_RELEASE"
-	else
-		_needle="$(detect_release; printf '%s' "$H_RELEASE")"
-	fi
-	[ -n "$_needle" ] || die 7 'Could not detect release.'
-	
-	for _hay in "$@"; do
-		[ "$_needle" = "$_hay" ] && return 0
-	done
-
-        return 1
-}
-
-
-##
-# Evaluate if a given string is a int.
-#
-# **Usage:** is_int str
-#
-# - str: any string to test against
-#
-# **Returns:** true if str is an integer
-#
-# .. code-block:: sh
-#
-#    is_int "$foo" || die 'Argument must be an integer.'
-##
-is_int() {
-	case "$1" in
-		(*[!0123456789]*) return 1;;
-		(*) return 0;;
+starts_with() {
+	case "$2" in
+		("$1"*) return 0;;
+		(*) return 1;;
 	esac
 }
 
@@ -512,49 +600,6 @@ to_lower() {
 ##
 to_upper() {
         printf '%s' "$1" | tr '[:lower:]' '[:upper:]'
-}
-
-
-##
-# Evaluate if a given string is true-like.
-#
-# **Usage:** is_true str
-#
-# - str: any string to test against
-#
-# **Returns:** true if ($str is 0) or (lower($str) == true)
-#
-# .. code-block:: sh
-#
-#    is_true "$foo" || die "\$foo said it isn't so..."
-##
-is_true() {
-        _str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
-        [ "$_str" = 'true' ] && return 0
-        [ "$_str" = '' ] && return 1
-	is_int "$_str" || return 1
-        [ "$_str" -eq '0' ] 2>/dev/null && return 0
-
-        return 1
-}
-
-##
-##
-# Evaluate if a given string is true-like.
-#
-# **Usage:** is_false str
-#
-# - str: any string to test against
-#
-# **Returns:** true if ($str != 0) or (lower($str) != true)
-#
-# .. code-block:: sh
-#
-#    is_false 'lies' || die 'I am too gullible'
-##
-is_false() {
-        is_true "$1" && return 1
-        return 0
 }
 
 

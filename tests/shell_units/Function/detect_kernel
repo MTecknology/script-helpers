@@ -2,7 +2,7 @@
 ##
 # Run tests for detect_distro().
 ##
-set -x
+#set -x
 
 . "$TEST_DIR/../lib/shell"
 
@@ -15,7 +15,7 @@ if [ -n "$EXPECT_KERNEL" ]; then
         detect_kernel
         [ "$H_KERNEL" = "$EXPECT_KERNEL" ] || exit 1
 else
-        log "$WARN" 'EXPECTED_KERNEL unset ; not running tests'
+        log "$WARN" 'EXPECT_KERNEL unset ; not running tests'
 fi
 
 

@@ -2,7 +2,7 @@
 ##
 # Run tests for detect_release().
 ##
-set -x
+#set -x
 
 . "$TEST_DIR/../lib/shell"
 
@@ -13,7 +13,7 @@ set -x
 # Check release (if defined)
 if [ -n "$EXPECT_RELEASE" ]; then
         detect_release
-        [ "$H_RELEASE" = "$EXPECT_RELEASE" ] || exit 1
+        starts_with "$EXPECT_RELEASE" "$H_RELEASE" || exit 1
 else
         log "$WARN" 'EXPECTED_RELEASE unset ; not running tests'
 fi

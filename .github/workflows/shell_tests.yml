@@ -266,7 +266,7 @@ jobs:
       TEST_SHELL: bash
       EXPECT_DISTRO: macos
       EXPECT_KERNEL: darwin
-      EXPECT_RELEASE: '11.0.1'
+      EXPECT_RELEASE: '11.0'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -279,7 +279,7 @@ jobs:
       TEST_SHELL: ksh
       EXPECT_DISTRO: macos
       EXPECT_KERNEL: darwin
-      EXPECT_RELEASE: '11.0.1'
+      EXPECT_RELEASE: '11.0'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -292,7 +292,7 @@ jobs:
       TEST_SHELL: zsh
       EXPECT_DISTRO: macos
       EXPECT_KERNEL: darwin
-      EXPECT_RELEASE: '11.0.1'
+      EXPECT_RELEASE: '11.0'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
