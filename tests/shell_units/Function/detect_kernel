@@ -1,14 +1,22 @@
 #!/bin/sh
 ##
-# Run tests for detect_kernel().
+# Run tests for detect_distro().
 ##
-#set -x
+set -x
 
 . "$TEST_DIR/../lib/shell"
 
 
-# Check that some kernel is detected
-( detect_kernel; test -n "$H_KERNEL" ); [ "$?" = 0 ] && exit 0
+# Check that some distro is detected
+( detect_distro; test -n "$H_KERNEL" ); [ "$?" = 0 ] && exit 0
+
+# Check distro (if defined)
+if [ -n "$EXPECT_KERNEL" ]; then
+        detect_kernel
+        [ "$H_KERNEL" = "$EXPECT_KERNEL" ] || exit 1
+else
+        log "$WARN" 'EXPECTED_KERNEL unset ; not running tests'
+fi
 
 
 # Complete

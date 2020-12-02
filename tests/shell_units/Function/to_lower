@@ -1,0 +1,23 @@
+#!/bin/sh
+##
+# Run tests for to_lower().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Some strings to test
+[ "$(to_lower 'abc')" = 'abc' ] || exit 1
+[ "$(to_lower '012')" = '012' ] || exit 1
+[ "$(to_lower 'ABC')" = 'abc' ] || exit 1
+[ "$(to_lower 'A12')" = 'a12' ] || exit 1
+[ "$(to_lower 'A1C')" = 'a1c' ] || exit 1
+[ "$(to_lower 'aB3')" = 'ab3' ] || exit 1
+[ "$(to_lower 'a12')" = 'a12' ] || exit 1
+[ "$(to_lower 'a1c')" = 'a1c' ] || exit 1
+[ "$(to_lower '0b3')" = '0b3' ] || exit 1
+
+
+# Complete
+exit 0

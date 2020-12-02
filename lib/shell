@@ -218,7 +218,7 @@ detect_kernel() {
 
 # Use uname output to detect kernel.
 _kern_uname() {
-	H_KERNEL="$(uname --kernel-name)"
+	H_KERNEL="$(to_lower "$(uname -s)")"
 	export H_KERNEL
 }
 
@@ -240,13 +240,19 @@ detect_distro() {
 	if [ -n "$H_KERNEL" ]; then
 		_kern="$H_KERNEL"
 	else
-		_kern="$(detect_kernel; printf '%s' "$H_KERNEL")"
+		_kern="$(to_lower "$(detect_kernel; printf '%s' "$H_KERNEL")")"
 	fi
 
 	if command_present 'lsb_release'; then
 		_distro_lsb
 		[ -n "$H_DISTRO" ] && return 0
-	fi;if [ "$_kern" = 'FreeBSD' ]; then
+	fi;if [ -f '/etc/os-release' ]; then
+		_distro_release
+		[ -n "$H_DISTRO" ] && return 0
+	fi;if command_present 'sw_vers'; then
+		_distro_swvers
+		[ -n "$H_DISTRO" ] && return 0
+	fi;if [ "$_kern" = 'freebsd' ]; then
 		_distro_freebsd
 		[ -n "$H_DISTRO" ] && return 0
 	fi
@@ -256,13 +262,30 @@ detect_distro() {
 
 # Detect release of Linux systems
 _distro_lsb() {
-	H_DISTRO="$(lsb_release --short --id)"
+	H_DISTRO="$(to_lower "$(lsb_release --short --id)")"
+	export H_DISTRO
+}
+
+# Detect release from /etc/*release* file
+_distro_release() {
+	if command_present 'awk'; then
+		H_DISTRO="$(to_lower "$(awk -F= '/^ID\=/{print $2}' /etc/os-release)")"
+		if [ -n "$H_DISTRO" ]; then
+			export H_DISTRO
+			return 0
+		fi
+	fi
+}
+
+# Detect release of Mac systems
+_distro_swvers() {
+	H_DISTRO='macos'
 	export H_DISTRO
 }
 
 # Detect release of FreeBSD systems
 _distro_freebsd() {
-	H_DISTRO='FreeBSD'
+	H_DISTRO='freebsd'
 	export H_DISTRO
 }
 
@@ -284,6 +307,12 @@ detect_release() {
 	if command_present 'lsb_release'; then
 		_release_lsb
 		[ -n "$H_RELEASE" ] && return 0
+	fi;if [ -f '/etc/os-release' ]; then
+		_release_release
+		[ -n "$H_RELEASE" ] && return 0
+	fi;if command_present 'sw_vers'; then
+		_release_swvers
+		[ -n "$H_DISTRO" ] && return 0
 	fi;if command_present 'freebsd-version'; then
 		_release_freebsd
 		[ -n "$H_RELEASE" ] && return 0
@@ -295,6 +324,23 @@ detect_release() {
 # Detect release version using lsb_release
 _release_lsb() {
 	H_RELEASE="$(lsb_release --short --release)"
+	export H_RELEASE
+}
+
+# Detect release from os-release
+_release_release() {
+	if command_present 'awk'; then
+		H_RELEASE="$(to_lower "$(awk -F= '/^VERSION_ID\=/{print $2}' /etc/os-release)")"
+		if [ -n "$H_RELEASE" ]; then
+			export H_RELEASE
+			return 0
+		fi
+	fi
+}
+
+# Detect release of Mac systems
+_release_swvers() {
+	H_RELEASE="$(sw_vers -productVersion)"
 	export H_RELEASE
 }
 
@@ -434,6 +480,41 @@ is_int() {
 }
 
 
+# Convert string from [:upper:] to [:lower:].
+#
+# **Usage:** to_lower
+#
+# - str: any ascii string to convert
+#
+# **Prints:** string in lower
+#
+# .. code-block:: sh
+#
+#    low="$(to_lower "$up")"
+##
+to_lower() {
+        printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+}
+
+
+##
+# Convert string from [:lower:] to [:upper:].
+#
+# **Usage:** to_upper
+#
+# - str: any ascii string to convert
+#
+# **Prints:** string in uppercase
+#
+# .. code-block:: sh
+#
+#    up="$(to_upper "$low")"
+##
+to_upper() {
+        printf '%s' "$1" | tr '[:lower:]' '[:upper:]'
+}
+
+
 ##
 # Evaluate if a given string is true-like.
 #
@@ -457,7 +538,7 @@ is_true() {
         return 1
 }
 
-
+##
 ##
 # Evaluate if a given string is true-like.
 #

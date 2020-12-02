@@ -26,6 +26,9 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: sh
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -36,6 +39,9 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: bash
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -46,6 +52,9 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: ksh
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -58,6 +67,9 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: ash
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -70,6 +82,9 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: zsh
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -82,6 +97,9 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: sh
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -92,6 +110,9 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: bash
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -102,6 +123,9 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: ksh
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -114,6 +138,9 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: ash
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -126,6 +153,9 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: zsh
+      EXPECT_DISTRO: ubuntu
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -228,6 +258,45 @@ jobs:
         with:
           usesh: true
           run: make test_shell
+
+  bash-mac-110:
+    name: bash (macos-11.0)
+    runs-on: macos-11.0
+    env:
+      TEST_SHELL: bash
+      EXPECT_DISTRO: macos
+      EXPECT_KERNEL: darwin
+      EXPECT_RELEASE: '11.0.1'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  ksh-mac-110:
+    name: ksh (macos-11.0)
+    runs-on: macos-11.0
+    env:
+      TEST_SHELL: ksh
+      EXPECT_DISTRO: macos
+      EXPECT_KERNEL: darwin
+      EXPECT_RELEASE: '11.0.1'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  zsh-mac-110:
+    name: zsh (macos-11.0)
+    runs-on: macos-11.0
+    env:
+      TEST_SHELL: zsh
+      EXPECT_DISTRO: macos
+      EXPECT_KERNEL: darwin
+      EXPECT_RELEASE: '11.0.1'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
 
   bash-mac-latest:
     name: bash (macos-latest)
