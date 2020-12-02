@@ -62,6 +62,7 @@ command_present() {
 detect_all() {
 	_e='0'
 	detect_distro || _e='1'
+	detect_init || _e='1'
 	detect_kernel || _e='1'
 	detect_release || _e='1'
 
@@ -90,19 +91,16 @@ detect_distro() {
 	fi
 
 	if command_present 'lsb_release'; then
-		_distro_lsb
-		[ -n "$H_DISTRO" ] && return 0
+		_distro_lsb && return 0
 	fi;if [ -f '/etc/os-release' ]; then
-		_distro_release
-		[ -n "$H_DISTRO" ] && return 0
+		_distro_release && return 0
 	fi;if command_present 'sw_vers'; then
-		_distro_swvers
-		[ -n "$H_DISTRO" ] && return 0
+		_distro_swvers && return 0
 	fi;if [ "$_kern" = 'freebsd' ]; then
-		_distro_freebsd
-		[ -n "$H_DISTRO" ] && return 0
+		_distro_freebsd && return 0
 	fi
 
+	log "$WARN" 'Unable to determine running distro.'
 	return 1
 }
 
@@ -126,37 +124,74 @@ _distro_release() {
 
 # Detect release of Mac systems
 _distro_swvers() {
-	H_DISTRO='macos'
-	export H_DISTRO
+	H_DISTRO='macosx'; export H_DISTRO
 }
 
 # Detect release of FreeBSD systems
 _distro_freebsd() {
-	H_DISTRO='freebsd'
-	export H_DISTRO
+	H_DISTRO='freebsd'; export H_DISTRO
 }
 
 
 ##
-# Detect distribution of running system.
+# Detect init of running system.
 #
-# **Usage:** detect_distro
+# **Usage:** detect_init
 #
 # **Returns:** true if detection succeeds
 #
-# **Exports:** H_DISTRO
+# **Exports:** H_INIT
 #
 # .. code-block:: sh
 #
-#    detect_distro || die 'Distro is not supported'
+#    detect_init || die 'Distro is not supported'
 ##
 detect_init() {
-	if [ -e '/sbin/init' ]; then
-		H_INIT="$(to_lower "$(/sbin/init --version | awk '{print $1}')")"
-		export H_INIT
-		return 0
+	if [ -n "$H_KERNEL" ]; then
+		_kern="$H_KERNEL"
+	else
+		_kern="$(to_lower "$(detect_kernel; printf '%s' "$H_KERNEL")")"
 	fi
+
+	if [ "$_kern" = 'freebsd' ]; then
+		H_INIT='bsd-init'; export H_INIT
+		return 0
+	elif [ "$_kern" = 'darwin' ]; then
+		H_INIT='launchd'; export H_INIT
+		return 0
+	elif [ -f '/sbin/init' ]; then
+		_init_sbin && return 0
+	fi
+	log "$WARN" 'Unable to determine running init.'
 	return 1
+}
+
+# Try to grab init system from /sbin/init
+_init_sbin() {
+	if command_present 'grep'; then
+		if strings /sbin/init | grep -q 'sysvinit'; then
+			H_INIT='sysvinit'; export H_INIT
+			return 0
+		elif strings /sbin/init | grep -q '/lib/systemd'; then
+			H_INIT='systemd'; export H_INIT
+			return 0
+		elif strings /sbin/init | grep -q 'upstart'; then
+			H_INIT='upstart'; export H_INIT
+			return 0
+		fi
+	fi;if command_present 'awk'; then
+		_i="$(strings /sbin/init | awk '/(systemd|sysvinit|upstart)/ {print $0}')"
+		if in_string 'sysvinit' "$_i"; then
+			H_INIT='sysvinit'; export H_INIT
+			return 0
+		elif in_string 'systemd' "$_i"; then
+			H_INIT='systemd'; export H_INIT
+			return 0
+		elif in_string 'upstart' "$_i"; then
+			H_INIT='upstart'; export H_INIT
+			return 0
+		fi
+	fi
 }
 
 
@@ -175,8 +210,7 @@ detect_init() {
 ##
 detect_kernel() {
 	if command_present 'uname'; then
-		_kern_uname
-		[ -n "$H_KERNEL" ] && return 0
+		_kern_uname && return 0
 	fi
 
 	return 1
@@ -204,19 +238,16 @@ _kern_uname() {
 ##
 detect_release() {
 	if command_present 'lsb_release'; then
-		_release_lsb
-		[ -n "$H_RELEASE" ] && return 0
+		_release_lsb && return 0
 	fi;if [ -f '/etc/os-release' ]; then
-		_release_release
-		[ -n "$H_RELEASE" ] && return 0
+		_release_release && return 0
 	fi;if command_present 'sw_vers'; then
-		_release_swvers
-		[ -n "$H_DISTRO" ] && return 0
+		_release_swvers && return 0
 	fi;if command_present 'freebsd-version'; then
-		_release_freebsd
-		[ -n "$H_RELEASE" ] && return 0
+		_release_freebsd && return 0
 	fi
 
+	log "$WARN" 'Unable to determine distribution release.'
 	return 1
 }
 
@@ -291,6 +322,7 @@ die() {
 #    low="$(to_lower "$up")"
 ##
 ends_with() {
+	[ "$1" = "$2" ] && return 0
 	case "$2" in
 		(*"$1") return 0;;
 		(*) return 1;;
@@ -349,17 +381,47 @@ in_string() {
 
 
 ##
+# A best-effort attempt to check if the internet is accepssible.
+#
+# **Usage:** internet_accessible
+#
+# **Defaults:**
+#
+# - env[PING_HOST]: google.com
+# - env[PING_ADDR]: 8.8.8.8
+#
+# **Returns:** true if internet was probed
+#
+# .. code-block:: sh
+#
+#    internet_accessible || die 'Cannot reach the internet'
+##
+internet_reachable() {
+	PING_HOST="${PING_HOST:-google.com/}"
+	PING_ADDR="${PING_ADDR:-8.8.8.8}"
+	if command_present 'wget'; then
+		wget -q --spider "http://$PING_HOST/" && return 0
+	elif command_present 'ping'; then
+		ping -qc 1 "$PING_ADDR" >/dev/null && return 0
+	else
+		log "$WARN" 'Unable to check internet connection.'
+	fi
+	return 1
+}
+
+
+##
 # Evaluate if running distribution matches provided argument(s).
 #
 # **Usage:** is_distro match [match..]
 #
-# - match: any string to test against (Debian, Ubuntu, RHEL, etc.)
+# - match: any string to test against (debian, ubuntu, etc.)
 #
 # **Returns:** true if running distro matches a provided 'match'
 #
 # .. code-block:: sh
 #
-#    is_distro 'Debian' || die 'Only Debian is supported'
+#    is_distro 'debian' || die 'Only Debian is supported'
 ##
 is_distro() {
 	if [ -n "$H_DISTRO" ]; then
@@ -378,7 +440,7 @@ is_distro() {
 
 
 ##
-# Evaluate if a given string is true-like.
+# Evaluate if a given string is not true-like.
 #
 # **Usage:** is_false str
 #
@@ -397,17 +459,17 @@ is_false() {
 
 
 ##
-# Evaluate if running distribution matches provided argument(s).
+# Evaluate if running init matches provided argument(s).
 #
-# **Usage:** is_distro match [match..]
+# **Usage:** is_init match [match..]
 #
-# - match: any string to test against (Debian, Ubuntu, RHEL, etc.)
+# - match: any string to test against (sysv, systemd, etc.)
 #
-# **Returns:** true if running distro matches a provided 'match'
+# **Returns:** true if running init matches a provided 'match'
 #
 # .. code-block:: sh
 #
-#    is_distro 'Debian' || die 'Only Debian is supported'
+#    is_init 'sysv' || die 'Only sysv is supported'
 ##
 is_init() {
 	if [ -n "$H_INIT" ]; then
@@ -540,7 +602,7 @@ is_true() {
 #
 # .. code-block:: sh
 #
-#    lock aquire "$0" || die 'Unable to grab lock'
+#    lock aquire "$0" || die 'Unable to grab lock.'
 #    [...]
 #    lock destroy "$0"
 ##
@@ -567,7 +629,7 @@ _lock_acquire() {
 
 
 ##
-# Print a formatted message if ENV[LOG_LEVEL] >= level.
+# Print a formatted message if env[LOG_LEVEL] >= level.
 #
 # **Usage:** log level message
 #
@@ -576,7 +638,7 @@ _lock_acquire() {
 #
 # **Defaults:**
 #
-# - ENV[LOG_LEVEL]: 2
+# - env[LOG_LEVEL]: 2
 #
 #
 # .. code-block:: sh
@@ -623,6 +685,7 @@ starts_with() {
 }
 
 
+##
 # Convert string from [:upper:] to [:lower:].
 #
 # **Usage:** to_lower

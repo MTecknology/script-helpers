@@ -1,6 +1,6 @@
 #!/bin/sh
 ##
-# Run tests for endss_with().
+# Run tests for ends_with().
 ##
 #set -x
 

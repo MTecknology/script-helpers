@@ -27,6 +27,7 @@ jobs:
     env:
       TEST_SHELL: sh
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '16.04'
     steps:
@@ -40,6 +41,7 @@ jobs:
     env:
       TEST_SHELL: bash
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '16.04'
     steps:
@@ -53,6 +55,7 @@ jobs:
     env:
       TEST_SHELL: ksh
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '16.04'
     steps:
@@ -68,6 +71,7 @@ jobs:
     env:
       TEST_SHELL: ash
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '16.04'
     steps:
@@ -83,6 +87,7 @@ jobs:
     env:
       TEST_SHELL: zsh
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '16.04'
     steps:
@@ -98,6 +103,7 @@ jobs:
     env:
       TEST_SHELL: sh
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '20.04'
     steps:
@@ -111,6 +117,7 @@ jobs:
     env:
       TEST_SHELL: bash
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '20.04'
     steps:
@@ -124,6 +131,7 @@ jobs:
     env:
       TEST_SHELL: ksh
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '20.04'
     steps:
@@ -139,6 +147,7 @@ jobs:
     env:
       TEST_SHELL: ash
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '20.04'
     steps:
@@ -154,6 +163,7 @@ jobs:
     env:
       TEST_SHELL: zsh
       EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
       EXPECT_RELEASE: '20.04'
     steps:
@@ -265,6 +275,7 @@ jobs:
     env:
       TEST_SHELL: bash
       EXPECT_DISTRO: macos
+      EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
       EXPECT_RELEASE: '11.0'
     steps:
@@ -278,6 +289,7 @@ jobs:
     env:
       TEST_SHELL: ksh
       EXPECT_DISTRO: macos
+      EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
       EXPECT_RELEASE: '11.0'
     steps:
@@ -291,6 +303,7 @@ jobs:
     env:
       TEST_SHELL: zsh
       EXPECT_DISTRO: macos
+      EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
       EXPECT_RELEASE: '11.0'
     steps:

@@ -1,0 +1,20 @@
+#!/bin/sh
+##
+# Run tests for internet_reachable().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+if is_true "$SKIP_NETWORK_TESTS"; then
+	log "$WARN" 'Skipping network-based tests.'
+	exit 0
+fi
+
+# Basic check; assume reachable
+internet_reachable || exit 1
+
+
+# Complete
+exit 0

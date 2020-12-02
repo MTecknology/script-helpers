@@ -12,10 +12,11 @@
 
 # Check init (if defined)
 if [ -n "$EXPECT_INIT" ]; then
-        detect_init || exit 1
-        [ "$H_INIT" = "$EXPECT_INIT" ] || exit 1
+	(	detect_init || return 1
+		test "$H_INIT" = "$EXPECT_INIT"
+	); [ "$?" = 0 ] || exit 1
 else
-        log "$WARN" 'EXPECT_INIT unset ; not running tests'
+	log "$WARN" 'EXPECT_INIT unset ; not running tests'
 fi
 
 

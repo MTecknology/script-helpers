@@ -12,10 +12,11 @@
 
 # Check kernel (if defined)
 if [ -n "$EXPECT_KERNEL" ]; then
-        detect_kernel
-        [ "$H_KERNEL" = "$EXPECT_KERNEL" ] || exit 1
+	(	detect_kernel || return 1
+		test "$H_KERNEL" = "$EXPECT_KERNEL"
+	); [ "$?" = 0 ] || exit 1
 else
-        log "$WARN" 'EXPECT_KERNEL unset ; not running tests'
+	log "$WARN" 'EXPECT_KERNEL unset ; not running tests'
 fi
 
 

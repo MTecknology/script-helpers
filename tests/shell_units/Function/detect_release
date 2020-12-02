@@ -12,10 +12,11 @@
 
 # Check release (if defined)
 if [ -n "$EXPECT_RELEASE" ]; then
-        detect_release
-        starts_with "$EXPECT_RELEASE" "$H_RELEASE" || exit 1
+	(	detect_release || return 1
+		starts_with "$EXPECT_RELEASE" "$H_RELEASE"
+	); [ "$?" = 0 ] || exit 1
 else
-        log "$WARN" 'EXPECT_RELEASE unset ; not running tests'
+	log "$WARN" 'EXPECT_RELEASE unset ; not running tests'
 fi
 
 
