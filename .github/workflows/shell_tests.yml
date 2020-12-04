@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: sh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -40,6 +41,7 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: bash
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -54,6 +56,7 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: ksh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -70,6 +73,7 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: ash
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -86,6 +90,7 @@ jobs:
     runs-on: ubuntu-16.04
     env:
       TEST_SHELL: zsh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -102,6 +107,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: sh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -116,6 +122,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: bash
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -130,6 +137,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: ksh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -146,6 +154,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: ash
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -162,6 +171,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       TEST_SHELL: zsh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: ubuntu
       EXPECT_INIT: systemd
       EXPECT_KERNEL: linux
@@ -274,6 +284,7 @@ jobs:
     runs-on: macos-11.0
     env:
       TEST_SHELL: bash
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: macos
       EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
@@ -288,6 +299,7 @@ jobs:
     runs-on: macos-11.0
     env:
       TEST_SHELL: ksh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: macos
       EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
@@ -302,6 +314,7 @@ jobs:
     runs-on: macos-11.0
     env:
       TEST_SHELL: zsh
+      EXPECT_ARCH: x86_64
       EXPECT_DISTRO: macos
       EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin

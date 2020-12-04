@@ -1,0 +1,36 @@
+#!/bin/sh
+##
+# Run tests for replace_substring().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Simple strings
+[ "$(replace_substring 'abcdef' 'cd' 'dc')" = 'abdcef' ] || exit 1
+[ "$(replace_substring 'abc' 'abc' 'cba')" = 'cba' ] || exit 1
+
+# Simple (number) strings
+[ "$(replace_substring '123' '123' '321')" = '321' ] || exit 1
+
+# Numbers w/ leading/trailing zeros
+[ "$(replace_substring '00123' '123' '321')" = '00321' ] || exit 1
+[ "$(replace_substring '12300' '123' '321')" = '32100' ] || exit 1
+[ "$(replace_substring '0012300' '123' '321')" = '0032100' ] || exit 1
+
+# Mismatched find/repl lengths
+[ "$(replace_substring '012345' '45' 'z')" = '0123z' ] || exit 1
+exit 0
+
+# Not found
+[ "$(replace_substring 'abcdef' 'aa' 'bb')" = 'abcdef' ] || exit 1
+
+# Empty input
+[ "$(replace_substring 'abcdef' '' 'bb')" = 'abcdef' ] || exit 1
+[ "$(replace_substring 'abcdef' 'ab' '')" = 'cdef' ] || exit 1
+[ "$(replace_substring '' 'ab' 'bb')" = '' ] || exit 1
+
+
+# Complete
+exit 0

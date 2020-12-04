@@ -61,12 +61,36 @@ command_present() {
 ##
 detect_all() {
 	_e='0'
+	detect_arch || _e='1'
 	detect_distro || _e='1'
 	detect_init || _e='1'
 	detect_kernel || _e='1'
 	detect_release || _e='1'
 
 	return "$_e"
+}
+
+
+##
+# Detect architecture of running system.
+#
+# **Usage:** detect_arch
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports:** H_ARCH
+#
+# .. code-block:: sh
+#
+#    detect_arch || die 'Architecture is not supported'
+##
+detect_arch() {
+	if command_present 'uname'; then
+		H_ARCH="$(uname -m)"; export H_ARCH
+		return 0
+	fi
+
+	return 1
 }
 
 
@@ -81,7 +105,7 @@ detect_all() {
 #
 # .. code-block:: sh
 #
-#    detect_distro || die 'Distro is not supported'
+#    detect_distro || die 'Distribution is not supported'
 ##
 detect_distro() {
 	if [ -n "$H_KERNEL" ]; then
@@ -108,28 +132,37 @@ detect_distro() {
 _distro_lsb() {
 	H_DISTRO="$(to_lower "$(lsb_release --short --id)")"
 	export H_DISTRO
+	return 0
 }
 
 # Detect release from /etc/*release* file
 _distro_release() {
 	if command_present 'awk'; then
 		H_DISTRO="$(to_lower "$(awk -F '=' '/^ID=/{print $2}' /etc/os-release)")"
+		if [ -n "$H_DISTRO" ]; then
+			export H_DISTRO
+			return 0
+		fi
+	fi;if command_present 'sed'; then
 		H_DISTRO="$(printf '%s' "$H_DISTRO" | sed 's/"//g')"
 		if [ -n "$H_DISTRO" ]; then
 			export H_DISTRO
 			return 0
 		fi
 	fi
+	return 1
 }
 
 # Detect release of Mac systems
 _distro_swvers() {
 	H_DISTRO='macosx'; export H_DISTRO
+	return 0
 }
 
 # Detect release of FreeBSD systems
 _distro_freebsd() {
 	H_DISTRO='freebsd'; export H_DISTRO
+	return 0
 }
 
 
@@ -210,16 +243,12 @@ _init_sbin() {
 ##
 detect_kernel() {
 	if command_present 'uname'; then
-		_kern_uname && return 0
+		H_KERNEL="$(to_lower "$(uname -s)")"
+		export H_KERNEL
+		return 0
 	fi
 
 	return 1
-}
-
-# Use uname output to detect kernel.
-_kern_uname() {
-	H_KERNEL="$(to_lower "$(uname -s)")"
-	export H_KERNEL
 }
 
 
@@ -397,7 +426,7 @@ in_string() {
 #    internet_accessible || die 'Cannot reach the internet'
 ##
 internet_reachable() {
-	PING_HOST="${PING_HOST:-google.com/}"
+	PING_HOST="${PING_HOST:-google.com}"
 	PING_ADDR="${PING_ADDR:-8.8.8.8}"
 	if command_present 'wget'; then
 		wget -q --spider "http://$PING_HOST/" && return 0
@@ -658,6 +687,30 @@ log() {
 
                 printf '*** %s: %s ***\n' "$_lvl" "$2"
         fi
+}
+
+
+##
+# Find/replace substrings in a string.
+#
+# **Usage:** replace_substring input find repl
+#
+# - input: full string to be manipulated
+# - find: key to search for
+# - repl: what to replace "key" with
+#
+# **Prints:** modified string
+#
+# .. code-block:: sh
+#
+#    log "$E" "$(replace_substring "$err" "$secret" '****')"
+##
+replace_substring() {
+	if command_present 'awk'; then
+		printf '%s' "$1" | awk -v f="$2" -v r="$3" 'gsub(f, r)'
+	else
+		die '7' 'Unable to replace_substring().'
+	fi
 }
 
 

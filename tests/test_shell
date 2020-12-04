@@ -8,21 +8,26 @@ TEST_DIR="$(dirname "$0")"; export TEST_DIR
 
 # Test shell
 TEST_SHELL="${TEST_SHELL:-sh}"
-printf 'Using shell: %s\n' "$TEST_SHELL"
 
 
 main() {
-	TESTS_FAILED='false'
+	C_FAILED=0
+	C_PASSED=0
+	# shellcheck disable=SC2126 #[grep -c doesn't work well here]
+	C_UNITS="$(grep 'exit 1' "$TEST_DIR/shell_units/"*/* | wc -l)"
+
+	# Header
+	printf '####\n# Running Tests\n#\tshell: %s\n####\n' \
+		"$TEST_SHELL"
 
 	# Run tests
 	run_tests 'Constant'
 	run_tests 'Function'
 
-	# Print summary
-	if [ "$TESTS_FAILED" = 'true' ]; then
-		printf '!!! One or more tests failed. !!!\n'
-		return 1
-	fi
+	# Summary
+	printf -- '####\n# TEST RESULTS: [ Failed: %s Passed: %s Tests: %s ]\n####\n' \
+		"$C_FAILED" "$C_PASSED" "$C_UNITS"
+	[ "$TESTS_FAILED" = 'true' ] && return 1
 	return 0
 }
 
@@ -39,9 +44,11 @@ run_tests() {
 		printf '%24s:\t' "$file"
 		if ! ("$TEST_SHELL" "$path"); then
 			printf 'FAILED\n'
+			C_FAILED="$((C_FAILED + 1))"
 			TESTS_FAILED='true'
 		else
 			printf 'Passed\n'
+			C_PASSED="$((C_PASSED + 1))"
 		fi
 	done
 }
