@@ -66,6 +66,7 @@ detect_all() {
 	detect_init || _e='1'
 	detect_kernel || _e='1'
 	detect_release || _e='1'
+	detect_virtual || _e='1'
 
 	return "$_e"
 }
@@ -308,6 +309,116 @@ _release_swvers() {
 _release_freebsd() {
 	H_RELEASE="$(freebsd-version -k)"
 	export H_RELEASE
+}
+
+
+##
+# Attempts to detect virtualization platform of running system
+#
+# **Usage:** detect_virtual
+#
+# **Exports:** H_VIRTUAL (H_VIRTUAL='' if no platform detected)
+#
+# .. code-block:: sh
+#
+#    detect_virtual
+##
+detect_virtual() {
+	if command_present 'dmidecode'; then
+		_detect_virt_dmiawk && return 0
+	else
+		log "$INFO" 'dmidecode not found; H_VIRTUAL accuracy decreased'
+	fi;if command_present 'lspci'; then
+		_detect_virt_lspci && return 0
+	else
+		log "$INFO" 'lspci not found; H_VIRTUAL accuracy decreased'
+	fi;if command_present 'pciconf'; then
+		_detect_virt_pciconf && return 0
+	fi
+
+	log "$DEBUG" 'No virtualization platform detected; assuming physical'
+	H_VIRTUAL=''; export H_VIRTUAL
+}
+
+# Detect virtualization using dmidecode + awk
+# Note: Only returns true if virt platform found
+_detect_virt_dmiawk() {
+	if command_present 'awk'; then
+		case "$(dmidecode | awk '/Vendor:/ {print $2}')" in
+			('QEMU'|'Bochs'|'SeaBIOS')
+				H_VIRTUAL='kvm'; export H_VIRTUAL
+				return 0
+				;;
+		esac
+		case "$(dmidecode | awk '/Manufacturer:/ {print $2}')" in
+			('QEMU'|'Bochs'|'oVirt'|'Google')
+				H_VIRTUAL='kvm'; export H_VIRTUAL
+				return 0
+				;;
+		esac
+		case "$(dmidecode | awk '/Product Name:/ {print $2}')" in
+			('RHEV')
+				H_VIRTUAL='kvm'; export H_VIRTUAL
+				return 0
+				;;
+		esac
+	fi
+	case "$(dmidecode)" in
+		# repeated from above, in case awk was not present
+		(*'QEMU'*|*'Bochs'*|*'SeaBIOS'*|*'oVirt'*|*'Google'*|*'RHEV'*)
+			H_VIRTUAL='kvm'; export H_VIRTUAL
+			return 0
+			;;
+		(*'VirtualBox'*)
+			H_VIRTUAL='virtualbox'; export H_VIRTUAL
+			return 0
+			;;
+		(*'VMWare'*)
+			H_VIRTUAL='vmware'; export H_VIRTUAL
+			return 0
+			;;
+		(*': Microsoft'*)
+			H_VIRTUAL='virtualpc'; export H_VIRTUAL
+			return 0
+			;;
+		(*'Parallels'*)
+			H_VIRTUAL='parallels'; export H_VIRTUAL
+			return 0
+			;;
+	esac
+	return 1
+}
+
+# Detect virtualization using lspci
+# Note: Only returns true if virt platform found
+_detect_virt_lspci() {
+	case "$(to_lower "$(lspci)")" in
+		(*'vmware'*)
+			H_VIRTUAL='vmware'; export H_VIRTUAL
+			return 0
+			;;
+		(*'virtualbox'*|*'innotek'*)
+			H_VIRTUAL='virtualbox'; export H_VIRTUAL
+			return 0
+			;;
+		(*'qemu'*|*'virtio'*)
+			H_VIRTUAL='kvm'; export H_VIRTUAL
+			return 0
+			;;
+	esac
+	return 1
+}
+
+# Detect virtualization using pciconf
+# Note: Only returns true if virt platform found
+_detect_virt_pciconf() {
+	case "$(to_lower "$(pciconf -lv)")" in
+		(*'innotek'*)
+			H_VIRTUAL='kvm'; export H_VIRTUAL
+			return 0
+			;;
+	esac
+	return 1
 }
 
 
@@ -619,6 +730,44 @@ is_true() {
         return 1
 }
 
+
+##
+# Evaluate if the current system is running on a virtualization platform.
+#
+# **Usage:** is_virt [type..]
+#
+# - type: if provided, check if virt platform matches at least one type
+#
+# **Returns:** true if virtual OR if H_VIRT==type
+#
+# .. code-block:: sh
+#
+#    is_virtual && die 'Must be run on physical hardware'
+#    is_virtual 'kvm' || die 'Only KVM is supported'
+##
+is_virtual() {
+	if [ -n "${H_VIRTUAL+physical}" ]; then
+		_needle="$H_VIRTUAL"
+	else
+		_needle="$(detect_virtual; printf '%s' "$H_VIRTUAL")"
+	fi
+	[ -n "${_needle+phys}" ] || die 7 'Could not detect virtualization platform.'
+
+	# If no [type] was provided]
+	if [ -z "$1" ]; then
+		[ -n "$_needle" ] && return 0
+		return 1
+	fi
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+        return 1
+}
+
+
+
 ##
 # Manage a lock file.
 #
@@ -877,9 +1026,9 @@ _largest_version() (
 	[ "$_v1" = "$_v2" ] && return 0
 
 	# Something is larger than nothing (30 < 30.0)
-	if [ -n "$_v1" ] && [ ! -n "$_v2" ]; then
+	if [ -n "$_v1" ] && [ -z "$_v2" ]; then
 		return 1
-	elif [ ! -n "$_v1" ] && [ -n "$_v2" ]; then
+	elif [ -z "$_v1" ] && [ -n "$_v2" ]; then
 		return 2
 	fi
 
