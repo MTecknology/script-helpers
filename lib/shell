@@ -62,6 +62,7 @@ command_present() {
 detect_all() {
 	_e='0'
 	detect_arch || _e='1'
+	detect_codename || _e='1'
 	detect_distro || _e='1'
 	detect_init || _e='1'
 	detect_kernel || _e='1'
@@ -92,6 +93,62 @@ detect_arch() {
 	fi
 
 	return 1
+}
+
+
+##
+# Detect codename of running system.
+#
+# **Usage:** detect_codename
+#
+# **Returns:** true if detection succeeds
+#
+# **Exports:** H_CODENAME
+#
+# .. code-block:: sh
+#
+#    detect_codename || die 'Distro codename not found'
+##
+detect_codename() {
+	if command_present 'lsb_release'; then
+		_codename_lsb && return 0
+	fi;if [ -f '/etc/os-release' ]; then
+		_codename_release && return 0
+	fi;if command_present 'sw_vers'; then
+		_codename_swvers && return 0
+	fi;if command_present 'freebsd-version'; then
+		# FreeBSD does not have release code names
+		H_CODENAME=''; export H_CODENAME
+		return 0
+	fi
+
+	log "$WARN" 'Unable to determine release codename.'
+	return 1
+}
+
+# Detect release codename using lsb_release
+_codename_lsb() {
+	H_CODENAME="$(to_lower "$(lsb_release --short --codename)")"
+	export H_CODENAME
+}
+
+# Detect codename from os-release
+_codename_release() {
+	if command_present 'awk'; then
+		H_CODENAME="$(to_lower "$(awk -F '=' '/^VERSION_CODENAME=/{print $2}' /etc/os-release)")"
+		H_CODENAME="$(printf '%s' "$H_CODENAME" | sed 's/"//g')"
+		if [ -n "$H_CODENAME" ]; then
+			export H_CODENAME
+			return 0
+		fi
+	fi
+}
+
+# Detect codename of Mac systems
+# Note: sw_vers identifies a mac, but the tool is very limited
+_codename_swvers() {
+	H_CODENAME="$(to_lower "$(sed -nE '/SOFTWARE LICENSE AGREEMENT FOR/s/([A-Za-z]+ ){5}|\\$//gp' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf')")"
+	export H_CODENAME
 }
 
 
@@ -145,7 +202,7 @@ _distro_release() {
 			return 0
 		fi
 	fi;if command_present 'sed'; then
-		H_DISTRO="$(printf '%s' "$H_DISTRO" | sed 's/"//g')"
+		H_DISTRO="$(to_lower "$(printf '%s' "$H_DISTRO" | sed 's/"//g')")"
 		if [ -n "$H_DISTRO" ]; then
 			export H_DISTRO
 			return 0
@@ -283,7 +340,7 @@ detect_release() {
 
 # Detect release version using lsb_release
 _release_lsb() {
-	H_RELEASE="$(lsb_release --short --release)"
+	H_RELEASE="$(to_lower "$(lsb_release --short --release)")"
 	export H_RELEASE
 }
 
@@ -301,13 +358,13 @@ _release_release() {
 
 # Detect release of Mac systems
 _release_swvers() {
-	H_RELEASE="$(sw_vers -productVersion)"
+	H_RELEASE="$(to_lower "$(sw_vers -productVersion)")"
 	export H_RELEASE
 }
 
 # Detect release of FreeBSD system
 _release_freebsd() {
-	H_RELEASE="$(freebsd-version -k)"
+	H_RELEASE="$(to_lower "$(freebsd-version -k)")"
 	export H_RELEASE
 }
 
@@ -435,14 +492,14 @@ _detect_virt_pciconf() {
 #    [ -n "$foo" ] || die 255 '$foo not defined'
 ##
 die() {
-        # If first argument was an integer, use as exit_status
+	# If first argument was an integer, use as exit_status
 	case "$1" in
 		(*[!0123456789]*) _exit_status=1;;
 		(*) _exit_status="$1"; shift;;
 	esac
 
-        printf '*** CRITICAL: %s ***\n' "$1"
-        exit "$_exit_status"
+	printf '*** CRITICAL: %s ***\n' "$1"
+	exit "$_exit_status"
 }
 
 
@@ -483,7 +540,7 @@ ends_with() {
 # .. code-block:: sh
 #
 #    helper_version '1.0.0' '1.999' ||
-#            die 'Helper version 1.x required!'
+#        die 'Helper version 1.x required!'
 ##
 helper_version() {
 	# Check minimum version
@@ -551,6 +608,65 @@ internet_reachable() {
 
 
 ##
+# Evaluate if running arch matches provided argument(s).
+#
+# **Usage:** is_arch match [match..]
+#
+# - match: any string to test against (debian, ubuntu, etc.)
+#
+# **Returns:** true if running arch matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_arch 'i386' 'x86_64' || die 'Architecture not supported'
+##
+is_arch() {
+	if [ -n "$H_ARCH" ]; then
+		_needle="$H_ARCH"
+	else
+		_needle="$(detect_arch; printf '%s' "$H_ARCH")"
+	fi
+	[ -n "$_needle" ] || die 7 'Could not detect distro.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+	return 1
+}
+
+
+##
+# Evaluate if running codename matches provided argument(s).
+#
+# **Usage:** is_codename match [match..]
+#
+# - match: any string to test against (buster, catalina, etc.)
+#
+# **Returns:** true if running codename matches a provided 'match'
+#
+# .. code-block:: sh
+#
+#    is_codename 'buster' || die 'Only Debian buster is supported'
+##
+is_codename() {
+	if [ -n "$H_CODENAME" ]; then
+		_needle="$H_CODENAME"
+	else
+		_needle="$(detect_codename; printf '%s' "$H_CODENAME")"
+	fi
+	# Skipped because FreeBSD has no "codename"
+	#[ -n "$_needle" ] || die 7 'Could not detect codename.'
+	
+	for _hay in "$@"; do
+		[ "$_needle" = "$_hay" ] && return 0
+	done
+
+	return 1
+}
+
+
+##
 # Evaluate if running distribution matches provided argument(s).
 #
 # **Usage:** is_distro match [match..]
@@ -575,7 +691,7 @@ is_distro() {
 		[ "$_needle" = "$_hay" ] && return 0
 	done
 
-        return 1
+	return 1
 }
 
 
@@ -593,8 +709,8 @@ is_distro() {
 #    is_false 'lies' || die 'I am too gullible'
 ##
 is_false() {
-        is_true "$1" && return 1
-        return 0
+	is_true "$1" && return 1
+	return 0
 }
 
 
@@ -623,7 +739,7 @@ is_init() {
 		[ "$_needle" = "$_hay" ] && return 0
 	done
 
-        return 1
+	return 1
 }
 
 
@@ -673,7 +789,7 @@ is_kernel() {
 		[ "$_needle" = "$_hay" ] && return 0
 	done
 
-        return 1
+	return 1
 }
 
 
@@ -689,7 +805,7 @@ is_kernel() {
 # .. code-block:: sh
 #
 #    is_release '14.04' '16.04' '18.04' '20.04' ||
-#            die 'Only non-EOL LTS releases are supported'
+#        die 'Only non-EOL LTS releases are supported'
 ##
 is_release() {
 	if [ -n "$H_RELEASE" ]; then
@@ -703,7 +819,7 @@ is_release() {
 		[ "$_needle" = "$_hay" ] && return 0
 	done
 
-        return 1
+	return 1
 }
 
 
@@ -721,13 +837,13 @@ is_release() {
 #    is_true "$foo" || die "\$foo said it isn't so..."
 ##
 is_true() {
-        _str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
-        [ "$_str" = 'true' ] && return 0
-        [ "$_str" = '' ] && return 1
+	_str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+	[ "$_str" = 'true' ] && return 0
+	[ "$_str" = '' ] && return 1
 	is_int "$_str" || return 1
-        [ "$_str" -eq '0' ] 2>/dev/null && return 0
+	[ "$_str" -eq '0' ] 2>/dev/null && return 0
 
-        return 1
+	return 1
 }
 
 
@@ -763,7 +879,7 @@ is_virtual() {
 		[ "$_needle" = "$_hay" ] && return 0
 	done
 
-        return 1
+	return 1
 }
 
 
@@ -825,17 +941,17 @@ _lock_acquire() {
 #    capture_qs || die 'Capture failed!'
 ##
 log() {
-        if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
-                case "$1" in
-                        (0) _lvl='DEBUG';;
-                        (1) _lvl='INFO';;
-                        (2) _lvl='WARN';;
-                        (3) _lvl='ERROR';;
-                        (*) _lvl='UNKNOWN';;
-                esac
+	if [ "${LOG_LEVEL:-2}" -le "$1" ]; then
+		case "$1" in
+			(0) _lvl='DEBUG';;
+			(1) _lvl='INFO';;
+			(2) _lvl='WARN';;
+			(3) _lvl='ERROR';;
+			(*) _lvl='UNKNOWN';;
+		esac
 
-                printf '*** %s: %s ***\n' "$_lvl" "$2"
-        fi
+		printf '*** %s: %s ***\n' "$_lvl" "$2"
+	fi
 }
 
 
@@ -901,7 +1017,7 @@ starts_with() {
 #    low="$(to_lower "$up")"
 ##
 to_lower() {
-        printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
+	printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
 }
 
 
@@ -919,7 +1035,7 @@ to_lower() {
 #    up="$(to_upper "$low")"
 ##
 to_upper() {
-        printf '%s' "$1" | tr '[:lower:]' '[:upper:]'
+	printf '%s' "$1" | tr '[:lower:]' '[:upper:]'
 }
 
 
