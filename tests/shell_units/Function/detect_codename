@@ -8,9 +8,7 @@
 
 
 # Check that detect_codename returns true
-set +x
 ( detect_codename ); [ "$?" = 0 ] || exit 1
-exit 0
 
 # Check codename (if defined)
 if [ -n "$EXPECT_CODENAME" ]; then

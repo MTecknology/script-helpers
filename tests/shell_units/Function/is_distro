@@ -9,14 +9,14 @@
 
 # Static-defined H_DISTRO (true)
 (
-	export H_DISTRO='Ubuntu';
-	is_distro 'Debian' 'Ubuntu'
+	export H_DISTRO='ubuntu';
+	is_distro 'debian' 'ubuntu'
 ); [ "$?" = '0' ] || exit 1
 
 # Static-defined H_DISTRO (false)
 (
-	export H_DISTRO='FreeBSD';
-	is_distro 'Debian' 'Ubuntu'
+	export H_DISTRO='freebsd';
+	is_distro 'debian' 'ubuntu'
 ); [ "$?" = '1' ] || exit 1
 
 

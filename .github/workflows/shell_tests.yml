@@ -295,8 +295,8 @@ jobs:
     env:
       TEST_SHELL: bash
       EXPECT_ARCH: x86_64
-      EXPECT_CODENAME: el capitan
-      EXPECT_DISTRO: macos
+      EXPECT_CODENAME: big sur
+      EXPECT_DISTRO: macosx
       EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
       EXPECT_RELEASE: '11.0'
@@ -311,8 +311,8 @@ jobs:
     env:
       TEST_SHELL: ksh
       EXPECT_ARCH: x86_64
-      EXPECT_CODENAME: el capitan
-      EXPECT_DISTRO: macos
+      EXPECT_CODENAME: big sur
+      EXPECT_DISTRO: macosx
       EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
       EXPECT_RELEASE: '11.0'
@@ -327,8 +327,8 @@ jobs:
     env:
       TEST_SHELL: zsh
       EXPECT_ARCH: x86_64
-      EXPECT_CODENAME: el capitan
-      EXPECT_DISTRO: macos
+      EXPECT_CODENAME: big sur
+      EXPECT_DISTRO: macosx
       EXPECT_INIT: launchd
       EXPECT_KERNEL: darwin
       EXPECT_RELEASE: '11.0'

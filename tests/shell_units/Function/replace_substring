@@ -21,15 +21,9 @@
 
 # Mismatched find/repl lengths
 [ "$(replace_substring '012345' '45' 'z')" = '0123z' ] || exit 1
-exit 0
 
 # Not found
 [ "$(replace_substring 'abcdef' 'aa' 'bb')" = 'abcdef' ] || exit 1
-
-# Empty input
-[ "$(replace_substring 'abcdef' '' 'bb')" = 'abcdef' ] || exit 1
-[ "$(replace_substring 'abcdef' 'ab' '')" = 'cdef' ] || exit 1
-[ "$(replace_substring '' 'ab' 'bb')" = '' ] || exit 1
 
 
 # Complete

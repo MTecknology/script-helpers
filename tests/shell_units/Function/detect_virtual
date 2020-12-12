@@ -13,7 +13,6 @@
 # Check virtual (if defined)
 if [ -n "${EXPECT_VIRTUAL+phys}" ]; then
 	(	detect_virtual || return 1
-		echo test "$H_VIRTUAL" = "$EXPECT_VIRTUAL"
 		test "$H_VIRTUAL" = "$EXPECT_VIRTUAL"
 	); [ "$?" = 0 ] || exit 1
 else

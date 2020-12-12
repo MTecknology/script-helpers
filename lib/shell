@@ -118,7 +118,7 @@ detect_codename() {
 		_codename_swvers && return 0
 	fi;if command_present 'freebsd-version'; then
 		# FreeBSD does not have release code names
-		H_CODENAME=''; export H_CODENAME
+		export H_CODENAME=''
 		return 0
 	fi
 
@@ -147,7 +147,7 @@ _codename_release() {
 # Detect codename of Mac systems
 # Note: sw_vers identifies a mac, but the tool is very limited
 _codename_swvers() {
-	H_CODENAME="$(to_lower "$(sed -nE '/SOFTWARE LICENSE AGREEMENT FOR/s/([A-Za-z]+ ){5}|\\$//gp' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf')")"
+	H_CODENAME="$(to_lower "$(awk '/SOFTWARE LICENSE AGREEMENT FOR/' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf' | sed 's/macOS/OS X/' | awk -F 'OS X ' '{print $NF}' | awk '{print substr($0, 0, length($0)-1)}')")"
 	export H_CODENAME
 }
 
@@ -213,13 +213,13 @@ _distro_release() {
 
 # Detect release of Mac systems
 _distro_swvers() {
-	H_DISTRO='macosx'; export H_DISTRO
+	export H_DISTRO='macosx'
 	return 0
 }
 
 # Detect release of FreeBSD systems
 _distro_freebsd() {
-	H_DISTRO='freebsd'; export H_DISTRO
+	export H_DISTRO='freebsd'
 	return 0
 }
 
@@ -245,10 +245,10 @@ detect_init() {
 	fi
 
 	if [ "$_kern" = 'freebsd' ]; then
-		H_INIT='bsd-init'; export H_INIT
+		export H_INIT='bsd-init'
 		return 0
 	elif [ "$_kern" = 'darwin' ]; then
-		H_INIT='launchd'; export H_INIT
+		export H_INIT='launchd'
 		return 0
 	elif [ -f '/sbin/init' ]; then
 		_init_sbin && return 0
@@ -261,25 +261,25 @@ detect_init() {
 _init_sbin() {
 	if command_present 'grep'; then
 		if strings /sbin/init | grep -q 'sysvinit'; then
-			H_INIT='sysvinit'; export H_INIT
+			export H_INIT='sysvinit'
 			return 0
 		elif strings /sbin/init | grep -q '/lib/systemd'; then
-			H_INIT='systemd'; export H_INIT
+			export H_INIT='systemd'
 			return 0
 		elif strings /sbin/init | grep -q 'upstart'; then
-			H_INIT='upstart'; export H_INIT
+			export H_INIT='upstart'
 			return 0
 		fi
 	fi;if command_present 'awk'; then
 		_i="$(strings /sbin/init | awk '/(systemd|sysvinit|upstart)/ {print $0}')"
 		if in_string 'sysvinit' "$_i"; then
-			H_INIT='sysvinit'; export H_INIT
+			export H_INIT='sysvinit'
 			return 0
 		elif in_string 'systemd' "$_i"; then
-			H_INIT='systemd'; export H_INIT
+			export H_INIT='systemd'
 			return 0
 		elif in_string 'upstart' "$_i"; then
-			H_INIT='upstart'; export H_INIT
+			export H_INIT='upstart'
 			return 0
 		fi
 	fi
@@ -394,7 +394,7 @@ detect_virtual() {
 	fi
 
 	log "$DEBUG" 'No virtualization platform detected; assuming physical'
-	H_VIRTUAL=''; export H_VIRTUAL
+	export H_VIRTUAL=''
 }
 
 # Detect virtualization using dmidecode + awk
@@ -403,19 +403,19 @@ _detect_virt_dmiawk() {
 	if command_present 'awk'; then
 		case "$(dmidecode | awk '/Vendor:/ {print $2}')" in
 			('QEMU'|'Bochs'|'SeaBIOS')
-				H_VIRTUAL='kvm'; export H_VIRTUAL
+				export H_VIRTUAL='kvm'
 				return 0
 				;;
 		esac
 		case "$(dmidecode | awk '/Manufacturer:/ {print $2}')" in
 			('QEMU'|'Bochs'|'oVirt'|'Google')
-				H_VIRTUAL='kvm'; export H_VIRTUAL
+				export H_VIRTUAL='kvm'
 				return 0
 				;;
 		esac
 		case "$(dmidecode | awk '/Product Name:/ {print $2}')" in
 			('RHEV')
-				H_VIRTUAL='kvm'; export H_VIRTUAL
+				export H_VIRTUAL='kvm'
 				return 0
 				;;
 		esac
@@ -423,23 +423,23 @@ _detect_virt_dmiawk() {
 	case "$(dmidecode)" in
 		# repeated from above, in case awk was not present
 		(*'QEMU'*|*'Bochs'*|*'SeaBIOS'*|*'oVirt'*|*'Google'*|*'RHEV'*)
-			H_VIRTUAL='kvm'; export H_VIRTUAL
+			export H_VIRTUAL='kvm'
 			return 0
 			;;
 		(*'VirtualBox'*)
-			H_VIRTUAL='virtualbox'; export H_VIRTUAL
+			export H_VIRTUAL='virtualbox'
 			return 0
 			;;
 		(*'VMWare'*)
-			H_VIRTUAL='vmware'; export H_VIRTUAL
+			export H_VIRTUAL='vmware'
 			return 0
 			;;
 		(*': Microsoft'*)
-			H_VIRTUAL='virtualpc'; export H_VIRTUAL
+			export H_VIRTUAL='virtualpc'
 			return 0
 			;;
 		(*'Parallels'*)
-			H_VIRTUAL='parallels'; export H_VIRTUAL
+			export H_VIRTUAL='parallels'
 			return 0
 			;;
 	esac
@@ -451,15 +451,15 @@ _detect_virt_dmiawk() {
 _detect_virt_lspci() {
 	case "$(to_lower "$(lspci)")" in
 		(*'vmware'*)
-			H_VIRTUAL='vmware'; export H_VIRTUAL
+			export H_VIRTUAL='vmware'
 			return 0
 			;;
 		(*'virtualbox'*|*'innotek'*)
-			H_VIRTUAL='virtualbox'; export H_VIRTUAL
+			export H_VIRTUAL='virtualbox'
 			return 0
 			;;
 		(*'qemu'*|*'virtio'*)
-			H_VIRTUAL='kvm'; export H_VIRTUAL
+			export H_VIRTUAL='kvm'
 			return 0
 			;;
 	esac
@@ -471,7 +471,7 @@ _detect_virt_lspci() {
 _detect_virt_pciconf() {
 	case "$(to_lower "$(pciconf -lv)")" in
 		(*'innotek'*)
-			H_VIRTUAL='kvm'; export H_VIRTUAL
+			export H_VIRTUAL='kvm'
 			return 0
 			;;
 	esac
@@ -971,6 +971,10 @@ log() {
 #    log "$E" "$(replace_substring "$err" "$secret" '****')"
 ##
 replace_substring() {
+	if ! in_string "$2" "$1"; then
+		printf '%s' "$1"
+		return 0
+	fi
 	if command_present 'awk'; then
 		printf '%s' "$1" | awk -v f="$2" -v r="$3" 'gsub(f, r)'
 	else
