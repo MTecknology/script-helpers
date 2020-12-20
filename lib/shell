@@ -572,8 +572,10 @@ helper_version() {
 #    in_string 'fuz' 'abcfuz123' && echo 'found some fuz'
 ##
 in_string() {
-	expr "_$2" : "_.*$1" >/dev/null && return 0
-	return 1
+	case $2 in
+		(*"$1"*) return 0;;
+		(*) return 1;;
+	esac
 }
 
 
