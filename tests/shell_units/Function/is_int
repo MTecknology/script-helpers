@@ -37,5 +37,10 @@ is_int '-12346791_23456' && exit 1
 is_int '12346791-23456' && exit 1
 is_int '-12346791-23456' && exit 1
 
+# Null values
+is_int '-' && exit 1
+is_int '' && exit 1
+
+
 # Complete
 exit 0

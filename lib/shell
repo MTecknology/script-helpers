@@ -763,6 +763,7 @@ is_int() {
 	[ "$(printf "%.1s" "$_i")" = '-' ] &&
 		_i="$(printf '%s' "$1" | cut -c2-)"
 	case "$_i" in
+		('') return 1;;
 		(*[!0123456789]*) return 1;;
 		(*) return 0;;
 	esac
@@ -842,9 +843,11 @@ is_release() {
 #    is_true "$foo" || die "\$foo said it isn't so..."
 ##
 is_true() {
+	# Everything to lower-case (True|TRUE|trUe -> true)
 	_str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
 	[ "$_str" = 'true' ] && return 0
 	[ "$_str" = '' ] && return 1
+	# False if number is non-zero.
 	is_int "$_str" || return 1
 	[ "$_str" -eq '0' ] 2>/dev/null && return 0
 

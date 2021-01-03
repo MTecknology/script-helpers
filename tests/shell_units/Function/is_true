@@ -10,6 +10,7 @@
 # Non-zero is false
 is_true 0 || exit 1
 is_true 2 && exit 1
+is_true -2 && exit 1
 
 # Valid 'true' strings
 is_true 'True' || exit 1
