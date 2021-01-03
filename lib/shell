@@ -759,7 +759,10 @@ is_init() {
 #    is_int "$foo" || die 'Argument must be an integer.'
 ##
 is_int() {
-	case "$1" in
+	_i="$1"
+	[ "$(printf "%.1s" "$_i")" = '-' ] &&
+		_i="$(printf '%s' "$1" | cut -c2-)"
+	case "$_i" in
 		(*[!0123456789]*) return 1;;
 		(*) return 0;;
 	esac

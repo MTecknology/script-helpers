@@ -20,6 +20,22 @@ is_int 'a1' && exit 1
 is_int '12346791x23456' && exit 1
 is_int '12346791_23456' && exit 1
 
+# Negative 'true' searches
+is_int '-1' || exit 1
+is_int '-01' || exit 1
+is_int '-10' || exit 1
+is_int '-198721387427' || exit 1
+
+# Negative 'false' searches
+is_int '-a' && exit 1
+is_int '-1a' && exit 1
+is_int '-a1' && exit 1
+is_int '-12346791x23456' && exit 1
+is_int '-12346791_23456' && exit 1
+
+# Negative 'false' searches w/ hyphen in middle
+is_int '12346791-23456' && exit 1
+is_int '-12346791-23456' && exit 1
 
 # Complete
 exit 0
