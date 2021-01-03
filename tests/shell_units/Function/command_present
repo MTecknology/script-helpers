@@ -18,6 +18,19 @@
 ( command_present 'vdVqouX5NW' ); [ "$?" = 1 ] || exit 1
 ( command_present 'PoaXHh8Rug' ); [ "$?" = 1 ] || exit 1
 
+# Alias present
+( alias foo=':'; command_present 'foo' ); [ "$?" = 0 ] || exit 1
+
+# Alias not present
+( alias foo=':'; command_present 'bar' ); [ "$?" = 1 ] || exit 1
+
+# Function present
+( foo(){ :; }; command_present 'foo' ); [ "$?" = 0 ] || exit 1
+exit 0
+
+# Function not present
+( foo(){ :; }; command_present 'bar' ); [ "$?" = 1 ] || exit 1
+
 
 # Complete
 exit 0

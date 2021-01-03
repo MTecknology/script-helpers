@@ -30,7 +30,7 @@ export DEBUG D INFO I WARN W ERROR E
 
 
 ##
-# Check if a command exists in ``$PATH``.
+# Check if a command (or alias/function) is available.
 #
 # **Usage:** command_present bin
 #
