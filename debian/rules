@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+export PREFIX=/usr
+
+# Variables relevant to tests:
+export SKIP_NETWORK_TESTS=True
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	# upstream uses git
+
+override_dh_auto_build:
+	# nothing to "build"
+
+override_dh_auto_test:
+	# tests fail against non-dev version
+	# and inside of build environment

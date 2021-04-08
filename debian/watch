@@ -1,0 +1,5 @@
+version=4
+opts=\
+filenamemangle=s/.+\/v?(\d\S+)\.tar\.gz/script_helpers-$1\.tar\.gz/,\
+pgpsigurlmangle=s/archive\/.+?\/(v?)(\d\S+)\.tar\.gz/releases\/download\/$1$2\/script_helpers-$2\.tar\.gz\.asc/ \
+  https://github.com/MTecknology/script_helpers/releases/latest .*/v?(\d\S+)\.tar\.gz

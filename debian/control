@@ -1,0 +1,17 @@
+Source: script-helpers
+Section: x11
+Priority: optional
+Maintainer: Michael Lustfield <mtecknology@debian.org>
+Build-Depends: debhelper-compat (= 13), shellcheck
+Standards-Version: 4.5.1.0
+Rules-Requires-Root: no
+Homepage: https://github.com/MTecknology/script_helpers
+Vcs-Browser: https://github.com/MTecknology/script_helpers
+Vcs-Git: https://github.com/MTecknology/script_helpers.git
+
+Package: script-helpers
+Architecture: all
+Depends: ${misc:Depends}
+Description: Script Helpers
+ A collection of script libraries to help with common repetitive tasks that
+ are often poorly implemented when written by the uninitiated.
