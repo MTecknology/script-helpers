@@ -11,7 +11,7 @@
 ##
 
 # Version of this script
-SCRIPT_HELPER_VERSION='dev'
+SCRIPT_HELPER_VERSION='1.0'
 readonly SCRIPT_HELPER_VERSION
 export SCRIPT_HELPER_VERSION
 
