@@ -236,7 +236,7 @@ _distro_freebsd() {
 #
 # .. code-block:: sh
 #
-#    detect_init || die 'Distro is not supported'
+#    detect_init || die 'Init detection failed'
 ##
 detect_init() {
 	if [ -n "$H_KERNEL" ]; then
@@ -380,6 +380,7 @@ _release_freebsd() {
 # .. code-block:: sh
 #
 #    detect_virtual
+#    printf 'Virtualization Platform: %s\n' "$H_VIRTUAL"
 ##
 detect_virtual() {
 	if command_present 'dmidecode'; then
@@ -517,7 +518,6 @@ die() {
 # .. code-block:: sh
 #
 #    ends_with 'init' "$input" || die 'invalid input'
-#    low="$(to_lower "$up")"
 ##
 ends_with() {
 	[ "$1" = "$2" ] && return 0
@@ -540,8 +540,8 @@ ends_with() {
 #
 # .. code-block:: sh
 #
-#    helper_version '1.0.0' '1.999' ||
-#        die 'Helper version 1.x required!'
+#    helper_version '1.2' ||
+#        die 'Helper version >= 1.2 required!'
 ##
 helper_version() {
 	# Check minimum version
@@ -615,7 +615,7 @@ internet_reachable() {
 #
 # **Usage:** is_arch match [match..]
 #
-# - match: any string to test against (debian, ubuntu, etc.)
+# - match: any string to test against (i386, x86_64, etc.)
 #
 # **Returns:** true if running arch matches a provided 'match'
 #
@@ -747,7 +747,7 @@ is_init() {
 
 
 ##
-# Evaluate if a given string is a int.
+# Evaluate if a given string is an integer.
 #
 # **Usage:** is_int str
 #
@@ -831,7 +831,7 @@ is_release() {
 
 
 ##
-# Evaluate if a given string is true-like.
+# Evaluate if a given string is true-like (True, TrUE, true, 0).
 #
 # **Usage:** is_true str
 #
@@ -905,7 +905,7 @@ is_virtual() {
 #
 # .. code-block:: sh
 #
-#    lock aquire "$0" || die 'Unable to grab lock.'
+#    lock acquire "$0" || die 'Unable to grab lock.'
 #    [...]
 #    lock destroy "$0"
 ##
@@ -1005,7 +1005,6 @@ replace_substring() {
 # .. code-block:: sh
 #
 #    starts_with 'init' "$input" || die 'invalid input'
-#    low="$(to_lower "$up")"
 ##
 starts_with() {
 	[ "$1" = "$2" ] && return 0
