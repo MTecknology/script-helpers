@@ -8,7 +8,7 @@
 
 
 # Check that some release is detected
-(set -x; detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] || exit 1
+(detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] || exit 1
 exit 0
 
 # Check release (if defined)
