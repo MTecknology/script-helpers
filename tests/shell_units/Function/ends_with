@@ -1,0 +1,29 @@
+#!/bin/sh
+##
+# Run tests for ends_with().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Some (valid) strings to test
+ends_with 'def' 'abcdef' || exit 1
+ends_with '123' 'abc123' || exit 1
+ends_with 'def' '123def' || exit 1
+ends_with 'AB3' '*U#AB3' || exit 1
+#ends_with '&@!' '!^*&@!' || exit 1
+
+# Some (invalid) strings to test
+ends_with 'dee' 'acbdef' && exit 1
+ends_with 'ab1' 'abc123' && exit 1
+ends_with 'fee' '124def' && exit 1
+ends_with '*U3' '*U#AB3' && exit 1
+ends_with '!^*' '!-*&@!' && exit 1
+
+# String in the middle of a string (invalid)
+ends_with 'U3' '*U#U3AB3' && exit 1
+
+
+# Complete
+exit 0

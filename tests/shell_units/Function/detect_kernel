@@ -1,0 +1,24 @@
+#!/bin/sh
+##
+# Run tests for detect_kernel().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Check that some kernel is detected
+( detect_kernel; test -n "$H_KERNEL" ); [ "$?" = 0 ] || exit 1
+
+# Check kernel (if defined)
+if [ -n "$EXPECT_KERNEL" ]; then
+	(	detect_kernel || return 1
+		test "$H_KERNEL" = "$EXPECT_KERNEL"
+	); [ "$?" = 0 ] || exit 1
+else
+	log "$WARN" 'EXPECT_KERNEL unset ; not running tests'
+fi
+
+
+# Complete
+exit 0

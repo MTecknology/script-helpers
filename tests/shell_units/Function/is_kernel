@@ -1,0 +1,24 @@
+#!/bin/sh
+##
+# Run tests for is_kernel().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Static-defined H_KERNEL (true)
+(
+	export H_KERNEL='linux';
+	is_kernel 'linux' 'aix'
+); [ "$?" = '0' ] || exit 1
+
+# Static-defined H_KERNEL (false)
+(
+	export H_KERNEL='freebsd';
+	is_kernel 'linux' 'aix'
+); [ "$?" = '1' ] || exit 1
+
+
+# Complete
+exit 0

@@ -1,0 +1,17 @@
+#!/bin/sh
+##
+# Run tests for SCRIPT_HELPER_VERSION.
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+# Check expected variables have expected values
+[ "$SCRIPT_HELPER_VERSION" = 'dev' ] || exit 1
+
+# Verify values cannot be changed
+( SCRIPT_HELPER_VERSION=77 ) 2>/dev/null && exit 1
+
+
+# Complete
+exit 0

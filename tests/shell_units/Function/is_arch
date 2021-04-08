@@ -1,0 +1,22 @@
+#!/bin/sh
+##
+# Run tests for is_arch().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Static-defined H_ARCH (true)
+(	export H_ARCH='i386';
+	is_arch 'i386' 'amd64' 'x86_64'
+); [ "$?" = '0' ] || exit 1
+
+# Static-defined H_ARCH (false)
+(	export H_ARCH='invalid';
+	is_arch 'i386' 'amd64' 'x86_64'
+); [ "$?" = '1' ] || exit 1
+
+
+# Complete
+exit 0

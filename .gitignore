@@ -1,0 +1,5 @@
+*.pyc
+_build/
+
+# Generated Documentation
+docs/helpers/*.rst

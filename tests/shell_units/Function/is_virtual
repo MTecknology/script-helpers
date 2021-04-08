@@ -1,0 +1,36 @@
+#!/bin/sh
+##
+# Run tests for is_virtual().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Static-defined H_VIRTUAL (true)
+(
+	export H_VIRTUAL='kvm';
+	is_virtual
+); [ "$?" = '0' ] || exit 1
+
+# Static-defined H_VIRTUAL (false)
+(
+	export H_VIRTUAL='';
+	is_virtual
+); [ "$?" = '1' ] || exit 1
+
+# Static-defined H_VIRTUAL (search true)
+(
+	export H_VIRTUAL='kvm';
+	is_virtual 'kvm' 'openvz'
+); [ "$?" = '0' ] || exit 1
+
+# Static-defined H_VIRTUAL (search false)
+(
+	export H_VIRTUAL='';
+	is_virtual 'kvm' 'openvz'
+); [ "$?" = '1' ] || exit 1
+
+
+# Complete
+exit 0

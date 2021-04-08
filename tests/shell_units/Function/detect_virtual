@@ -1,0 +1,24 @@
+#!/bin/sh
+##
+# Run tests for detect_virtual().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Check that some virtual is detected
+( detect_virtual; test -n "${H_VIRTUAL+phys}" ); [ "$?" = 0 ] || exit 1
+
+# Check virtual (if defined)
+if [ -n "${EXPECT_VIRTUAL+phys}" ]; then
+	(	detect_virtual || return 1
+		test "$H_VIRTUAL" = "$EXPECT_VIRTUAL"
+	); [ "$?" = 0 ] || exit 1
+else
+	log "$WARN" 'EXPECT_VIRTUAL unset ; not running tests'
+fi
+
+
+# Complete
+exit 0

@@ -1,0 +1,36 @@
+#!/bin/sh
+##
+# Run tests for command_present().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Binaries that should almost definitely exist on any *nix-like system
+( command_present 'sh' ); [ "$?" = 0 ] || exit 1
+( command_present 'ls' ); [ "$?" = 0 ] || exit 1
+( command_present 'mv' ); [ "$?" = 0 ] || exit 1
+
+
+# Binaries that should almost definitely NOT exist
+( command_present 'BRQ9f8U3fi' ); [ "$?" = 1 ] || exit 1
+( command_present 'vdVqouX5NW' ); [ "$?" = 1 ] || exit 1
+( command_present 'PoaXHh8Rug' ); [ "$?" = 1 ] || exit 1
+
+# Alias present
+( alias foo=':'; command_present 'foo' ); [ "$?" = 0 ] || exit 1
+
+# Alias not present
+( alias foo=':'; command_present 'bar' ); [ "$?" = 1 ] || exit 1
+
+# Function present
+( foo(){ :; }; command_present 'foo' ); [ "$?" = 0 ] || exit 1
+exit 0
+
+# Function not present
+( foo(){ :; }; command_present 'bar' ); [ "$?" = 1 ] || exit 1
+
+
+# Complete
+exit 0

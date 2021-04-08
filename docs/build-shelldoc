@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+'''
+Generate a documentation file from input "library" scripts.
+'''
+import os
+import re
+import subprocess
+import sys
+
+
+WORKSPACE = os.environ.get('WORKSPACE', './')
+SHELL_LIB = f'{WORKSPACE}/lib/shell'
+SHELL_DOC = f'{WORKSPACE}/docs/helpers/shell.rst'
+
+
+if not os.path.exists(SHELL_LIB):
+    print(f'{SHELL_LIB} not found in context: skipping')
+    sys.exit(0)
+
+with open(SHELL_DOC, 'w') as _out:
+
+    # Header
+    _out.write('.. _helpers_shell:\n\n')
+    _out.write('Shell Helpers\n=============\n\n')
+
+    # Constants
+    _out.write('Constants\n---------\n\n')
+    proc = subprocess.Popen(
+            f'. {SHELL_LIB}; export',
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True)
+    exports = proc.communicate()[0].decode('utf-8')
+    with open(SHELL_LIB, 'r') as _in:
+        lines = ''.join(_in.readlines())
+    #for m in re.findall(r'^#\s(.*?)$\n^readonly\s(.+)', lines, re.M):
+    for m in re.findall(r'\n\n^#\s(.+?)$.+?readonly\s(.+?)$', lines, re.M|re.S):
+        #_out.write('**{}:**\n\n'.format(m[0]))
+        _out.write('{}\n{}\n'.format(
+            m[0],
+            ''.join(['+' for _ in m[0]])))
+        for var in m[1].split():
+            _out.write('- {}: {}\n'.format(
+                var,
+                re.search(r'\s{}\=\'(.+?)\''.format(var), exports).group(1)))
+        _out.write('\n')
+
+    # Functions
+    with open(SHELL_LIB, 'r') as _in:
+        _out.write('Functions\n---------\n\n')
+        builder = ''
+        for line in _in.readlines():
+            if '() {\n' in line and not line.startswith('_'):
+                command = line.split('(')[0]
+                _out.write('{}\n{}\n\n{}\n'.format(
+                    command,
+                    ''.join(['+' for _ in command]),
+                    builder))
+                continue
+            if line.startswith('##'):
+                continue
+            elif line.startswith('#'):
+                builder += line.strip('#')
+                continue
+            else:
+                builder = ''
+                continue

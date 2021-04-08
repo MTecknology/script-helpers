@@ -1,0 +1,33 @@
+#!/bin/sh
+##
+# Run tests for is_false().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Non-zero is false
+is_false 0 && exit 1
+is_false 2 || exit 1
+
+# Valid 'true' strings
+is_false 'True' && exit 1
+is_false 'true' && exit 1
+is_false 'TrUe' && exit 1
+
+# Invalid 'true' strings
+is_false 'tru' || exit 1
+is_false 'truee' || exit 1
+
+# Valid 'non-true' strings
+is_false 'False' || exit 1
+is_false 'false' || exit 1
+
+# Other strings
+is_false '' || exit 1
+is_false '_' || exit 1
+
+
+# Complete
+exit 0

@@ -1,0 +1,57 @@
+#!/bin/bash
+##
+# Find and run test units on shell scripts
+##
+
+# Repository root
+TEST_DIR="$(dirname "$0")"; export TEST_DIR
+
+# Test shell
+TEST_SHELL="${TEST_SHELL:-sh}"
+
+
+main() {
+	C_FAILED=0
+	C_PASSED=0
+	# shellcheck disable=SC2126 #[grep -c doesn't work well here]
+	C_UNITS="$(grep 'exit 1' "$TEST_DIR/shell_units/"*/* | wc -l)"
+
+	# Header
+	printf '####\n# Running Tests\n#\tshell: %s\n####\n' \
+		"$TEST_SHELL"
+
+	# Run tests
+	run_tests 'Constant'
+	run_tests 'Function'
+
+	# Summary
+	printf -- '####\n# TEST RESULTS: [ Failed: %s Passed: %s Tests: %s ]\n####\n' \
+		"$C_FAILED" "$C_PASSED" "$C_UNITS"
+	[ "$TESTS_FAILED" = 'true' ] && return 1
+	return 0
+}
+
+
+run_tests() {
+	printf 'Running %s Tests...\n' "$1"
+
+	for path in "$TEST_DIR/shell_units/$1/"*; do
+		file="$(basename "$path")"
+		# Skip files starting with an underscore
+		[ "$file" = "${file#_}" ] || continue
+
+		# Run test unit
+		printf '%24s:\t' "$file"
+		if ! ("$TEST_SHELL" "$path"); then
+			printf 'FAILED\n'
+			C_FAILED="$((C_FAILED + 1))"
+			TESTS_FAILED='true'
+		else
+			printf 'Passed\n'
+			C_PASSED="$((C_PASSED + 1))"
+		fi
+	done
+}
+
+
+main "$@"

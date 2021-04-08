@@ -1,0 +1,16 @@
+#!/bin/sh
+##
+# Run tests for FUNCTION_NAME() || VARIABLE.
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Test(s) description
+func_name 'good_param' || return 1
+func_name 'bad_param' && return 1
+
+
+# Complete
+return 0

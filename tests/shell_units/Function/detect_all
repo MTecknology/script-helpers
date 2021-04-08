@@ -1,0 +1,15 @@
+#!/bin/sh
+##
+# Run tests for detect_all().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# This only calls other functions... it's to trivial/problematic for testing.
+: # PASS
+
+
+# Complete
+exit 0

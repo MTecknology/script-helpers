@@ -1,0 +1,368 @@
+name: Shell Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  shellcheck:
+    name:  ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run shellcheck
+        uses: ludeeus/action-shellcheck@master
+        env:
+          SHELLCHECK_OPTS: -e SC1091
+          # https://github.com/koalaman/shellcheck/wiki/SC1091
+
+  sh-ubuntu-1604:
+    name: sh (ubuntu-16.04)
+    runs-on: ubuntu-16.04
+    env:
+      TEST_SHELL: sh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: xenial
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  bash-ubuntu-1604:
+    name: bash (ubuntu-16.04)
+    runs-on: ubuntu-16.04
+    env:
+      TEST_SHELL: bash
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: xenial
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  ksh-ubuntu-1604:
+    name: ksh (ubuntu-16.04)
+    runs-on: ubuntu-16.04
+    env:
+      TEST_SHELL: ksh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: xenial
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y ksh
+            make test_shell
+
+  ash-ubuntu-1604:
+    name: ash (ubuntu-16.04)
+    runs-on: ubuntu-16.04
+    env:
+      TEST_SHELL: ash
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: xenial
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y ash
+            make test_shell
+
+  zsh-ubuntu-1604:
+    name: zsh (ubuntu-16.04)
+    runs-on: ubuntu-16.04
+    env:
+      TEST_SHELL: zsh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: xenial
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '16.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y zsh
+            make test_shell
+
+  sh-ubuntu-2004:
+    name: sh (ubuntu-20.04)
+    runs-on: ubuntu-20.04
+    env:
+      TEST_SHELL: sh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: focal
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  bash-ubuntu-2004:
+    name: bash (ubuntu-20.04)
+    runs-on: ubuntu-20.04
+    env:
+      TEST_SHELL: bash
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: focal
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  ksh-ubuntu-2004:
+    name: ksh (ubuntu-20.04)
+    runs-on: ubuntu-20.04
+    env:
+      TEST_SHELL: ksh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: focal
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y ksh
+            make test_shell
+
+  ash-ubuntu-2004:
+    name: ash (ubuntu-20.04)
+    runs-on: ubuntu-20.04
+    env:
+      TEST_SHELL: ash
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: focal
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y ash
+            make test_shell
+
+  zsh-ubuntu-2004:
+    name: zsh (ubuntu-20.04)
+    runs-on: ubuntu-20.04
+    env:
+      TEST_SHELL: zsh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: focal
+      EXPECT_DISTRO: ubuntu
+      EXPECT_INIT: systemd
+      EXPECT_KERNEL: linux
+      EXPECT_RELEASE: '20.04'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y zsh
+            make test_shell
+
+  sh-ubuntu-latest:
+    name: sh (ubuntu-latest)
+    runs-on: ubuntu-latest
+    env:
+      TEST_SHELL: sh
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  bash-ubuntu-latest:
+    name: bash (ubuntu-latest)
+    runs-on: ubuntu-latest
+    env:
+      TEST_SHELL: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  ksh-ubuntu-latest:
+    name: ksh (ubuntu-latest)
+    runs-on: ubuntu-latest
+    env:
+      TEST_SHELL: ksh
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y ksh
+            make test_shell
+
+  ash-ubuntu-latest:
+    name: ash (ubuntu-latest)
+    runs-on: ubuntu-latest
+    env:
+      TEST_SHELL: ash
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y ash
+            make test_shell
+
+  zsh-ubuntu-latest:
+    name: zsh (ubuntu-latest)
+    runs-on: ubuntu-latest
+    env:
+      TEST_SHELL: zsh
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            sudo apt install -y zsh
+            make test_shell
+
+  bash-freebsd-latest:
+    name: bash (freebsd-latest)
+    runs-on: macos-latest
+    env:
+      TEST_SHELL: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        uses: vmactions/freebsd-vm@v0.0.9
+        with:
+          usesh: true
+          prepare: pkg install -y bash
+          run: make test_shell
+
+  ksh-freebsd-latest:
+    name: ksh (freebsd-latest)
+    runs-on: macos-latest
+    env:
+      TEST_SHELL: ksh
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        uses: vmactions/freebsd-vm@v0.0.9
+        with:
+          usesh: true
+          run: make test_shell
+
+  zsh-freebsd-latest:
+    name: zsh (freebsd-latest)
+    runs-on: macos-latest
+    env:
+      TEST_SHELL: zsh
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        uses: vmactions/freebsd-vm@v0.0.9
+        with:
+          usesh: true
+          run: make test_shell
+
+  bash-mac-110:
+    name: bash (macos-11.0)
+    runs-on: macos-11.0
+    env:
+      TEST_SHELL: bash
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: big sur
+      EXPECT_DISTRO: macosx
+      EXPECT_INIT: launchd
+      EXPECT_KERNEL: darwin
+      EXPECT_RELEASE: '11.0'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  ksh-mac-110:
+    name: ksh (macos-11.0)
+    runs-on: macos-11.0
+    env:
+      TEST_SHELL: ksh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: big sur
+      EXPECT_DISTRO: macosx
+      EXPECT_INIT: launchd
+      EXPECT_KERNEL: darwin
+      EXPECT_RELEASE: '11.0'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  zsh-mac-110:
+    name: zsh (macos-11.0)
+    runs-on: macos-11.0
+    env:
+      TEST_SHELL: zsh
+      EXPECT_ARCH: x86_64
+      EXPECT_CODENAME: big sur
+      EXPECT_DISTRO: macosx
+      EXPECT_INIT: launchd
+      EXPECT_KERNEL: darwin
+      EXPECT_RELEASE: '11.0'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  bash-mac-latest:
+    name: bash (macos-latest)
+    runs-on: macos-latest
+    env:
+      TEST_SHELL: bash
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  ksh-mac-latest:
+    name: ksh (macos-latest)
+    runs-on: macos-latest
+    env:
+      TEST_SHELL: ksh
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell
+
+  zsh-mac-latest:
+    name: zsh (macos-latest)
+    runs-on: macos-latest
+    env:
+      TEST_SHELL: zsh
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: make test_shell

@@ -1,0 +1,78 @@
+#!/bin/sh
+##
+# Run tests for version_compare().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Simple test of all operators
+( version_compare '1' 'lesser_than' '2' ); [ "$?" = '0' ] || exit 1
+( version_compare '2' 'equal' '2' ); [ "$?" = '0' ] || exit 1
+( version_compare '3' 'not_equal' '1' ); [ "$?" = '0' ] || exit 1
+( version_compare '2' 'greater_than' '1' ); [ "$?" = '0' ] || exit 1
+( version_compare '1' '-lt' '2' ); [ "$?" = '0' ] || exit 1
+( version_compare '2' '-eq' '2' ); [ "$?" = '0' ] || exit 1
+( version_compare '3' '-ne' '1' ); [ "$?" = '0' ] || exit 1
+( version_compare '2' '-gt' '1' ); [ "$?" = '0' ] || exit 1
+
+# Semver test of primary operators (expect true)
+( version_compare '7.0.1' '-lt' '7.0.2' ); [ "$?" = '0' ] || exit 1
+( version_compare '7.0.2' '-eq' '7.0.2' ); [ "$?" = '0' ] || exit 1
+( version_compare '3.0.2' '-ne' '2.0.7' ); [ "$?" = '0' ] || exit 1
+( version_compare '7.0.2' '-gt' '7.0.1' ); [ "$?" = '0' ] || exit 1
+
+# Semver test of primary operators (expect false)
+( version_compare '7.0.2' '-lt' '7.0.1' ); [ "$?" = '1' ] || exit 1
+( version_compare '3.0.2' '-eq' '2.0.7' ); [ "$?" = '1' ] || exit 1
+( version_compare '7.0.2' '-ne' '7.0.2' ); [ "$?" = '1' ] || exit 1
+( version_compare '7.0.1' '-gt' '7.0.2' ); [ "$?" = '1' ] || exit 1
+
+# Mismatched version strings (expect true)
+( version_compare '7' '-lt' '7.1' ); [ "$?" = '0' ] || exit 1
+( version_compare '3' '-ne' '7.0.0' ); [ "$?" = '0' ] || exit 1
+( version_compare '7.0.1' '-gt' '7' ); [ "$?" = '0' ] || exit 1
+
+# Mismatched version strings (expect false)
+( version_compare '7.0.0' '-eq' '7.0' ); [ "$?" = '1' ] || exit 1
+
+# Invalid operation supplied
+( version_compare '2' '-inv' '1' >/dev/null ); [ "$?" = '7' ] || exit 1
+
+# Invalid version formats
+( version_compare '1..0' '==' '1.0' >/dev/null ); [ "$?" = '7' ] || exit 1
+( version_compare '1.0' '==' '1..0' >/dev/null ); [ "$?" = '7' ] || exit 1
+( version_compare '1.0' '==' '1.0b7' >/dev/null ); [ "$?" = '7' ] || exit 1
+( version_compare '1.0a' '==' '1.0' >/dev/null ); [ "$?" = '7' ] || exit 1
+
+# "how does that handle comparing 10.0.0 (not a number) to 2.0 (a number)?"
+( version_compare '10.0.0' '-lt' '2.0' ); [ "$?" = '1' ] || exit 1
+( version_compare '10.0' '-gt' '2.0.0' ); [ "$?" = '0' ] || exit 1
+
+# not less/greater-than... but equal
+( version_compare '7' '-lt' '7' ); [ "$?" = '1' ] || exit 1
+( version_compare '7' '-gt' '7' ); [ "$?" = '1' ] || exit 1
+
+# String vs. numerical comparison
+( version_compare '1.18.1' '-gt' '1.8.1' ); [ "$?" = '0' ] || exit 1
+
+
+# Random tests found on the internet
+( version_compare '1' '==' '1' ); [ "$?" = '0' ] || exit 1
+( version_compare '2.1' '<' '2.2' ); [ "$?" = '0' ] || exit 1
+( version_compare '3.0.4.10' '>' '3.0.4.2' ); [ "$?" = '0' ] || exit 1
+( version_compare '4.08' '<' '4.08.01' ); [ "$?" = '0' ] || exit 1
+( version_compare '3.2.1.9.8144' '>' '3.2' ); [ "$?" = '0' ] || exit 1
+( version_compare '3.2' '<' '3.2.1.9.8144' ); [ "$?" = '0' ] || exit 1
+( version_compare '1.2' '<' '2.1' ); [ "$?" = '0' ] || exit 1
+( version_compare '2.1' '>' '1.2' ); [ "$?" = '0' ] || exit 1
+( version_compare '5.6.7' '==' '5.6.7' ); [ "$?" = '0' ] || exit 1
+( version_compare '1.01.1' '==' '1.1.1' ); [ "$?" = '0' ] || exit 1
+( version_compare '1.1.1' '==' '1.01.1' ); [ "$?" = '0' ] || exit 1
+( version_compare '1' '!=' '1.0' ); [ "$?" = '0' ] || exit 1
+( version_compare '1.0.0' '!=' '1.0' ); [ "$?" = '0' ] || exit 1
+
+
+# Complete
+exit 0

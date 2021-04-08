@@ -1,0 +1,23 @@
+#!/bin/sh
+##
+# Run tests for to_upper().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Some strings to test
+[ "$(to_upper 'abc')" = 'ABC' ] || exit 1
+[ "$(to_upper '012')" = '012' ] || exit 1
+[ "$(to_upper 'ABC')" = 'ABC' ] || exit 1
+[ "$(to_upper 'A12')" = 'A12' ] || exit 1
+[ "$(to_upper 'A1C')" = 'A1C' ] || exit 1
+[ "$(to_upper 'aB3')" = 'AB3' ] || exit 1
+[ "$(to_upper 'a12')" = 'A12' ] || exit 1
+[ "$(to_upper 'a1c')" = 'A1C' ] || exit 1
+[ "$(to_upper '0b3')" = '0B3' ] || exit 1
+
+
+# Complete
+exit 0

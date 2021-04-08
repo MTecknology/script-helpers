@@ -1,0 +1,30 @@
+#!/bin/sh
+##
+# Run tests for in_string().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Simple 'true' searches
+in_string 'abc' 'anthuabcaeua' || exit 1
+in_string '12' 'anthu12caeua' || exit 1
+in_string '12' '88812888' || exit 1
+
+# Simple 'false' searches
+in_string 'abc' 'anthuacaeua' && exit 1
+in_string '12' 'anthu1caeua' && exit 1
+in_string '12' '8881888' && exit 1
+
+# Variable substituted 'true' searches
+needle='abc'; haystack='*!V^abc;'
+in_string "$needle" "$haystack" || exit 1
+
+# Variable substituted 'false' searches
+needle='abc'; haystack='*!V^ABC;'
+in_string "$needle" "$haystack" && exit 1
+
+
+# Complete
+exit 0

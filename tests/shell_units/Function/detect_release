@@ -1,0 +1,25 @@
+#!/bin/sh
+##
+# Run tests for detect_release().
+##
+#set -x
+
+. "$TEST_DIR/../lib/shell"
+
+
+# Check that some release is detected
+(detect_release; test -n "$H_RELEASE" ); [ "$?" = 0 ] || exit 1
+exit 0
+
+# Check release (if defined)
+if [ -n "$EXPECT_RELEASE" ]; then
+	(	detect_release || return 1
+		starts_with "$EXPECT_RELEASE" "$H_RELEASE"
+	); [ "$?" = 0 ] || exit 1
+else
+	log "$WARN" 'EXPECT_RELEASE unset ; not running tests'
+fi
+
+
+# Complete
+exit 0
