@@ -4,16 +4,21 @@ export WORKSPACE ?= $(abspath $(PWD)/)
 .PHONY: clean
 clean:
 	@#rm -rf _build docs/helpers/*.rst
-	git clean -fxdn
+	git clean -fxd
 
 # Build documentation
 .PHONY: docs
-docs: clean
+docs:
 	sphinx-build docs/ _build/docs/
 
 # Run all tests
 .PHONY: test
-test: test_shell shellcheck
+test: test_py3 test_shell shellcheck
+
+# Run only py3 tests
+.PHONY: test_py3
+test_py3:
+	python3 -m pytest --rootdir=tests/test_py3
 
 # Run only shell tests
 .PHONY: test_shell

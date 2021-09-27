@@ -7,9 +7,11 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath('../'))
+sys.path.insert(0, os.path.abspath('../lib/'))
 
 def setup(app):
     os.system(os.path.realpath(__file__).replace('/conf.py', '/build-shelldoc'))
+    os.system(os.path.realpath(__file__).replace('/conf.py', '/build-py3doc'))
 
 
 ##

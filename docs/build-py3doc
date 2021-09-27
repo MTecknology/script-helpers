@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+'''
+Generate a documentation file from input "library" scripts.
+'''
+import os
+import re
+import subprocess
+import sys
+
+
+WORKSPACE = os.environ.get('WORKSPACE', './')
+PY3_LIB = f'{WORKSPACE}/lib/py3helpers.py'
+PY3_DOC = f'{WORKSPACE}/docs/helpers/python3.rst'
+
+
+if not os.path.exists(PY3_LIB):
+    print(f'{PY3_LIB} not found in context: skipping')
+    sys.exit(0)
+
+with open(PY3_DOC, 'w') as _out:
+
+    # Header
+    _out.write('.. _helpers_python3:\n\n')
+    _out.write('Python3 Helpers\n===============\n\n')
+
+    # Manually find classes and functions
+    # ... because "auto"doc actually sucks
+    with open(PY3_LIB, 'r') as _in:
+        for line in _in.readlines():
+            if line.startswith('class '):
+                name = str(line.split(' ')[1].split('(')[0])
+                # header
+                _out.write('{}\n{}\n\n'.format(
+                    name,
+                    ''.join(['-' for _ in name]))),
+                _out.write('.. autoclass:: py3helpers.{}\n  :members:\n\n'.format(name))
+            elif line.startswith('def '):
+                name = str(line.split(' ')[1].split('(')[0]) + '()'
+                # header
+                _out.write('{}\n{}\n\n'.format(
+                    name,
+                    ''.join(['-' for _ in name]))),
+                _out.write('.. autofunction:: py3helpers.{}\n\n'.format(name))

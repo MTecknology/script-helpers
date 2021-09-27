@@ -6,7 +6,9 @@
    :maxdepth: 3
 
    helpers/shell
+   helpers/python3
    samples/shell
+   samples/python3
    development
 
 Script Helpers

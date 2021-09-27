@@ -3,8 +3,8 @@
 Shell Samples
 =============
 
-Basic Skeleton
---------------
+Basic Shell Skeleton
+--------------------
 
 .. code-block:: sh
 

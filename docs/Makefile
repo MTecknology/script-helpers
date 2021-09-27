@@ -48,6 +48,7 @@ help:
 
 gen_docs:
 	$(WORKSPACE)/docs/build-shelldoc
+	$(WORKSPACE)/docs/build-py3doc
 
 .PHONY: clean
 clean:
