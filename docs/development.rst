@@ -24,8 +24,8 @@ Shell Notes
     This library is built with many edge cases in mind. In practice, it's
     unlikely these situations will even be encountered. For example, ``[0-9]``
     is not used in the extremely unlikely chance it is not expanded to
-    ``0123456789``. The typical script /should/ prefer the shorter and more
-    readable form.
+    ``0123456789``. This library cares about such edge cases; typical consumer
+    scripts should prefer the shorter and more readable form.
 
     Refer to :ref:`Shell Samples` for general script writing tips.
 

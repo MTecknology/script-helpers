@@ -78,14 +78,15 @@ Basic Skeleton
 
 
     show_help() {
+        t="$(printf '\t')
         cat <<-EOF
             Run a CICD build.
 
             Usage: script_name [options]
 
             Options:
-              -i X\tExports CICD_MAGIC_ID for build process
-              -h\tPrint this help text and exit
+              -i X${t}Exports CICD_MAGIC_ID for build process
+              -h${t}Print this help text and exit
             EOF
     }
 
