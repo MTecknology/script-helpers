@@ -11,3 +11,15 @@ Script Helpers
 ==============
 
 A simple set of helper functions to aid the development of scripts.
+
+Shell Example:
+```
+. path/to/helpers/shell
+is_true "$var" || die 'oops'
+```
+
+Python Example:
+```
+import py3helpers
+py3helpers.collapse_integers([1,2,3,4])
+```
