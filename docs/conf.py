@@ -24,7 +24,7 @@ release = u'0.0.1'
 
 ## General ##
 project = u'Script Helpers'
-copyright = u'2020, Michael Lustfield'
+copyright = u'2020, Michael Lustfield'  # pylint: disable=W0622
 author = u'Michael Lustfield'
 
 ## Other ##
