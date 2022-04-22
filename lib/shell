@@ -1021,7 +1021,7 @@ starts_with() {
 ##
 # Convert string from [:upper:] to [:lower:].
 #
-# **Usage:** to_lower
+# **Usage:** to_lower str
 #
 # - str: any ascii string to convert
 #
@@ -1039,7 +1039,7 @@ to_lower() {
 ##
 # Convert string from [:lower:] to [:upper:].
 #
-# **Usage:** to_upper
+# **Usage:** to_upper str
 #
 # - str: any ascii string to convert
 #
