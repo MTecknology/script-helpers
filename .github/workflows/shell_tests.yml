@@ -165,13 +165,13 @@ jobs:
 
   bash-freebsd-latest:
     name: bash (freebsd-latest)
-    runs-on: macos-latest
+    runs-on: macos-10.15
     env:
       TEST_SHELL: bash
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        uses: vmactions/freebsd-vm@v0.0.9
+        uses: vmactions/freebsd-vm@v0.1.5
         with:
           usesh: true
           prepare: pkg install -y bash
@@ -179,26 +179,26 @@ jobs:
 
   ksh-freebsd-latest:
     name: ksh (freebsd-latest)
-    runs-on: macos-latest
+    runs-on: macos-10.15
     env:
       TEST_SHELL: ksh
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        uses: vmactions/freebsd-vm@v0.0.9
+        uses: vmactions/freebsd-vm@v0.1.5
         with:
           usesh: true
           run: make test_shell
 
   zsh-freebsd-latest:
     name: zsh (freebsd-latest)
-    runs-on: macos-latest
+    runs-on: macos-10.15
     env:
       TEST_SHELL: zsh
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        uses: vmactions/freebsd-vm@v0.0.9
+        uses: vmactions/freebsd-vm@v0.1.5
         with:
           usesh: true
           run: make test_shell
