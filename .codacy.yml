@@ -1,0 +1,4 @@
+---
+exclude_paths:
+  # Tests often include things, like assert, which are bad for production use
+  - 'tests/test_py3/**'
