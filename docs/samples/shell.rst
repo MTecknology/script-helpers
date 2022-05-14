@@ -78,7 +78,7 @@ Basic Shell Skeleton
 
 
     show_help() {
-        t="$(printf '\t')
+        t="$(printf '\t')"
         cat <<-EOF
             Run a CICD build.
 
