@@ -848,7 +848,7 @@ is_release() {
 ##
 is_true() {
 	# Everything to lower-case (True|TRUE|trUe -> true)
-	_str="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+	_str="$(printf '%s' "$1" | tr '[A-Z]' '[a-z]')"
 	[ "$_str" = 'true' ] && return 0
 	[ "$_str" = '' ] && return 1
 	# False if number is non-zero.
